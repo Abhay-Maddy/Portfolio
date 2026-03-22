@@ -1,14 +1,33 @@
 # 🚀 Abhay Maddheshiya  Portfolio
 
-<img width="250" height="400" alt="image" src="https://github.com/user-attachments/assets/5a8c0f93-51e3-4535-981f-5798572d4b91" />
+## 📱 Screenshots
 
-<img width="250" height="400" alt="image" src="https://github.com/user-attachments/assets/7c7f406e-3a71-4e6c-b936-1f22468e8e5f" />
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/5a8c0f93-51e3-4535-981f-5798572d4b91" 
+       width="220" 
+       style="margin:10px; border-radius:10px;" />
 
-<img width="250" height="400" alt="image" src="https://github.com/user-attachments/assets/981d0ea1-7145-485a-9ddd-d29f158a1749" />
+  <img src="https://github.com/user-attachments/assets/7c7f406e-3a71-4e6c-b936-1f22468e8e5f" 
+       width="220" 
+       style="margin:10px; border-radius:10px;" />
 
-<img width="100" alt="image" src="https://github.com/user-attachments/assets/8e9df930-012b-4f23-a158-884ca3e02f8e" />
+  <img src="https://github.com/user-attachments/assets/981d0ea1-7145-485a-9ddd-d29f158a1749" 
+       width="220" 
+       style="margin:10px; border-radius:10px;" />
+</p>
 
-<img width="100" alt="image" src="https://github.com/user-attachments/assets/8e9df930-012b-4f23-a158-884ca3e02f8e)" />
+<p align="center" style="margin-top:20px;">
+  <img src="https://github.com/user-attachments/assets/8e9df930-012b-4f23-a158-884ca3e02f8e" 
+       width="220" 
+       style="margin:10px; border-radius:10px;" />
+</p>
+
+---
+
+<p align="center" style="margin-top:20px;">
+🌐 <b>Live Website:</b>  
+<a href="https://abhay-maddy.github.io/Portfolio/">Visit Portfolio</a>
+</p>
 
 🌐 **Live Website:**
 👉 [https://abhay-maddy.github.io/Portfolio/](https://abhay-maddy.github.io/Portfolio/)
