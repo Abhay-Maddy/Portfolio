@@ -2,15 +2,15 @@
 
 ## 📱 Screenshots
 
-<img src="https://github.com/user-attachments/assets/5a8c0f93-51e3-4535-981f-5798572d4b91" width="190" height="400" />
+<img src="https://github.com/user-attachments/assets/5a8c0f93-51e3-4535-981f-5798572d4b91" height="200" />
 
-<img src="https://github.com/user-attachments/assets/7c7f406e-3a71-4e6c-b936-1f22468e8e5f" width="190" height="400" />
+<img src="https://github.com/user-attachments/assets/7c7f406e-3a71-4e6c-b936-1f22468e8e5f" height="200" />
 
-<img src="https://github.com/user-attachments/assets/981d0ea1-7145-485a-9ddd-d29f158a1749" width="190" height="400" />
+<img src="https://github.com/user-attachments/assets/981d0ea1-7145-485a-9ddd-d29f158a1749" height="200" />
 
-<img src="https://github.com/user-attachments/assets/3ae86745-da20-498b-9e80-60c247bcc592" widht="190" height="400"/>
+<img src="https://github.com/user-attachments/assets/3ae86745-da20-498b-9e80-60c247bcc592" height="200" />
 
-<img src="https://github.com/user-attachments/assets/8e9df930-012b-4f23-a158-884ca3e02f8e" width="190" height="400"/>
+<img src="https://github.com/user-attachments/assets/8e9df930-012b-4f23-a158-884ca3e02f8e" height="200" />
 
 🌐 **Live Website:** 
 <a href="https://abhay-maddy.github.io/Portfolio/" style="margin-top:20px;">Visit Portfolio</a>
