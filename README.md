@@ -6,12 +6,15 @@
 
 <img width="100" height="400" alt="{F33903FF-4F5D-4636-B087-0F26E1F689DF}" src="https://github.com/user-attachments/assets/981d0ea1-7145-485a-9ddd-d29f158a1749" />
 
+<img width="100" height="400" alt="image" src="image/Image1.jpeg" />
+
+<img width="100" height="400" alt="image" src="image/Image2.jpeg" />
 
 🌐 **Live Website:**
-👉 [https://abhay-maddheshiya.github.io/Portfolio/](https://abhay-maddheshiya.github.io/Portfolio/)
+👉 [https://abhay-maddy.github.io/Portfolio/](https://abhay-maddy.github.io/Portfolio/)
 
 📂 **GitHub Repository:**
-👉 [https://github.com/abhay-maddheshiya/Portfolio](https://github.com/abhay-maddheshiya/Portfolio)
+👉 [https://github.com/Abhay-Maddy/Portfolio](https://github.com/Abhay-Maddy/Portfolio)
 
 ---
 
