@@ -1,10 +1,11 @@
 # 🚀 Abhay Maddheshiya  Portfolio
 
-<img width="50" height="50" alt="image" src="https://github.com/user-attachments/assets/5a8c0f93-51e3-4535-981f-5798572d4b91" />
+<img width="100" height="200" alt="image" src="https://github.com/user-attachments/assets/5a8c0f93-51e3-4535-981f-5798572d4b91" />
 
-<img width="50" height="50" alt="image" src="https://github.com/user-attachments/assets/7c7f406e-3a71-4e6c-b936-1f22468e8e5f" />
+<img width="100" height="200" alt="image" src="https://github.com/user-attachments/assets/7c7f406e-3a71-4e6c-b936-1f22468e8e5f" />
 
-<img width="50" height="50" alt="{F33903FF-4F5D-4636-B087-0F26E1F689DF}" src="https://github.com/user-attachments/assets/981d0ea1-7145-485a-9ddd-d29f158a1749" />
+<img width="100" height="200" alt="{F33903FF-4F5D-4636-B087-0F26E1F689DF}" src="https://github.com/user-attachments/assets/981d0ea1-7145-485a-9ddd-d29f158a1749" />
+
 
 🌐 **Live Website:**
 👉 [https://abhay-maddheshiya.github.io/Portfolio/](https://abhay-maddheshiya.github.io/Portfolio/)
