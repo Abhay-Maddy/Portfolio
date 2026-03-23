@@ -8,9 +8,9 @@
 
 <img src="https://github.com/user-attachments/assets/981d0ea1-7145-485a-9ddd-d29f158a1749"  width="170"  />
 
-<img src="https://github.com/user-attachments/assets/3ae86745-da20-498b-9e80-60c247bcc592"  height="200"  />
+<img src="https://github.com/user-attachments/assets/3ae86745-da20-498b-9e80-60c247bcc592"  height="100"  />
 
-<img src="https://github.com/user-attachments/assets/8e9df930-012b-4f23-a158-884ca3e02f8e"  height="200"  />
+<img src="https://github.com/user-attachments/assets/8e9df930-012b-4f23-a158-884ca3e02f8e"  height="100"  />
 
 
 🌐 **Live Website:** 
