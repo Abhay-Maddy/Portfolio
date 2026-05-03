@@ -1,10 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Abhay Maddheshiya - BTech Student | Software Developer | Problem Solver. Premium portfolio showcasing modern web development projects and technical expertise.">
-  <meta name="keywords" content="Abhay Maddheshiya, portfolio, software developer, web developer, BTech, projects, resume">
+  <meta name="description"
+    content="Abhay Maddheshiya — BTech Student · Software Developer · Problem Solver. Cinematic portfolio showcasing modern web development projects and technical expertise.">
+  <meta name="keywords"
+    content="Abhay Maddheshiya, portfolio, software developer, web developer, BTech, projects, resume">
   <meta name="author" content="Abhay Maddheshiya">
   <title>Abhay Maddheshiya | Portfolio</title>
 
@@ -12,39 +15,49 @@
   <meta property="og:title" content="Abhay Maddheshiya | Portfolio">
   <meta property="og:description" content="BTech Student | Software Developer | Problem Solver">
   <meta property="og:type" content="website">
-  
+
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap"
+    rel="stylesheet">
+
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  
+
   <!-- Favicon -->
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
-  <link rel="icon" type="image/png" href="images/favicon.png">
-  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="stylesheet" href="style.css?v=3">
 </head>
-<body data-theme="light">
-  
+
+<body>
+
+  <!-- Custom Cursor -->
+  <div id="cursor-dot"></div>
+  <div id="cursor-ring"></div>
+
+  <!-- Particle Canvas -->
+  <canvas id="particle-canvas"></canvas>
+
   <!-- Loading Screen -->
   <div id="loader" class="loader">
-    <div class="loader-content">
-      <div class="loader-circle"></div>
-      <p>Loading...</p>
+    <div class="loader-logo">AM</div>
+    <div class="loader-bar">
+      <div class="loader-bar-fill"></div>
     </div>
   </div>
 
-  <!-- Navigation -->
+  <!-- ── Navigation ─────────────────────── -->
   <header class="navbar" id="navbar">
     <nav class="nav-container">
       <div class="nav-brand">
         <a href="#home" class="logo">
           <span class="logo-mark">AM</span>
+          <span class="logo-text">Abhay</span>
         </a>
       </div>
-      
+
       <ul class="nav-menu" id="nav-menu">
         <li><a href="#home" class="nav-link">Home</a></li>
         <li><a href="#about" class="nav-link">About</a></li>
@@ -53,10 +66,10 @@
         <li><a href="#resume" class="nav-link">Resume</a></li>
         <li><a href="#contact" class="nav-link">Contact</a></li>
       </ul>
-      
+
       <div class="nav-actions">
         <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
-          <i class="fas fa-moon"></i>
+          <i class="fas fa-sun"></i>
         </button>
         <button id="mobile-toggle" class="mobile-toggle" aria-label="Toggle menu">
           <i class="fas fa-bars"></i>
@@ -65,125 +78,191 @@
     </nav>
   </header>
 
-  <!-- Hero Section -->
+  <!-- ── Hero ──────────────────────────── -->
   <section id="home" class="hero">
+    <!-- Ambient blobs -->
+    <div class="hero-blob hero-blob-1"></div>
+    <div class="hero-blob hero-blob-2"></div>
+    <div class="hero-blob hero-blob-3"></div>
+
     <div class="hero-container">
+      <!-- Left: text -->
       <div class="hero-content">
         <div class="hero-badge">
-          <span>🚀 Welcome</span>
+          <span class="hero-badge-dot"></span>
+          Available for opportunities
         </div>
+
         <h1 class="hero-title">
-          Hi, I'm <span class="gradient-text">Abhay Maddheshiya</span>
+          Hi, I'm<br>
+          <span class="hero-name">Abhay Maddheshiya</span>
         </h1>
+
         <p class="hero-subtitle">
-          BTech Student | Software Developer | Problem Solver
+          <span class="typewriter-text" id="typewriter"></span><span class="typewriter-cursor"></span>
         </p>
+
         <p class="hero-description">
-          Passionate about crafting innovative solutions through clean code and modern technologies. 
-          I love turning complex problems into elegant user experiences.
+          Passionate about crafting innovative solutions through clean code and modern technologies.
+          I love turning complex problems into elegant, immersive user experiences.
         </p>
+
         <div class="hero-buttons">
-          <a href="#projects" class="btn btn-primary btn-large">
+          <a href="#projects" class="btn btn-primary">
+            <i class="fas fa-rocket"></i>
             <span>View Projects</span>
-            <i class="fas fa-arrow-right"></i>
           </a>
-          <a href="#resume" class="btn btn-secondary btn-large">
-            <span>Download Resume</span>
-            <i class="fas fa-download"></i>
+          <a href="#contact" class="btn btn-ghost">
+            <i class="fas fa-paper-plane"></i>
+            <span>Let's Talk</span>
           </a>
+        </div>
+
+        <div class="hero-stats">
+          <div class="stat">
+            <span class="stat-num" data-count="10">0</span>
+            <span class="stat-label">Projects Built</span>
+          </div>
+          <div class="stat">
+            <span class="stat-num" data-count="3">0</span>
+            <span class="stat-label">Internships</span>
+          </div>
+          <div class="stat">
+            <span class="stat-num" data-count="5">0</span>
+            <span class="stat-label">Technologies</span>
+          </div>
         </div>
       </div>
-      
+
+      <!-- Right: image -->
       <div class="hero-image">
-        <div class="profile-image">
-          <img src="image/photo.jpg" alt="Abhay Maddheshiya - Software Developer" loading="lazy">
+        <div class="profile-wrap">
+          <div class="profile-ring"></div>
+          <div class="profile-ring-2"></div>
+          <div class="profile-image">
+            <img src="image/photo.jpg" alt="Abhay Maddheshiya — Software Developer" loading="eager">
+            <div class="profile-glow"></div>
+          </div>
+
+          <!-- Floating pills -->
+          <div class="tech-pill pill-1">
+            <i class="fab fa-react"></i> React
+          </div>
+          <div class="tech-pill pill-2">
+            <i class="fab fa-node-js"></i> Node.js
+          </div>
+          <div class="tech-pill pill-3">
+            <i class="fas fa-code"></i> Full-Stack
+          </div>
         </div>
       </div>
     </div>
+
+    <!-- Scroll indicator -->
+    <div class="scroll-indicator">
+      <span>SCROLL</span>
+      <div class="scroll-line"></div>
+    </div>
   </section>
-<hr>
-  <!-- About Section -->
+
+  <hr>
+
+  <!-- ── About ─────────────────────────── -->
   <section id="about" class="section about">
     <div class="container">
-      <h2 class="section-title">About Me</h2>
-      
-      <div class="about-grid">
-        <div class="about-text">
-          <p class="about-summary">
-            I'm a dedicated Software Developer currently pursuing BTech with a strong foundation 
-            in modern web technologies, data structures, and problem-solving. I thrive on 
-            building scalable applications and delivering exceptional user experiences.
-          </p>
-          
-          <div class="career-objective">
-            <h3>Career Objective</h3>
-            <p>Seeking a challenging position to utilize my technical skills and contribute to innovative projects while continuously growing as a developer.</p>
-          </div>
+      <div class="section-header anim-hidden">
+        <span class="section-label">// about me</span>
+        <h2 class="section-title">Who I <span class="highlight">Am</span></h2>
+        <p class="section-desc">A passionate developer constantly pushing the boundaries of what's possible on the web.
+        </p>
+      </div>
 
-          <h3 class="soft-skills-title"></i>Soft Skills</h3>
-          <div class="soft-skills">
-            
-            <span class="skill-tag">Problem Solving</span>
-            <span class="skill-tag">Team Collaboration</span>
-            <span class="skill-tag">Communication</span>
-            <span class="skill-tag">Time Management</span>
+      <div class="about-grid">
+        <!-- Left: intro -->
+        <div class="about-text-block anim-hidden">
+          <div class="glowcard">
+            <p class="about-summary">
+              I'm a dedicated Software Developer currently pursuing BTech with a strong foundation
+              in modern web technologies, data structures, and problem-solving. I thrive on
+              building scalable applications and delivering exceptional user experiences.
+            </p>
+
+            <div class="career-box">
+              <h3><i class="fas fa-bullseye"></i> Career Objective</h3>
+              <p>Seeking a challenging position to utilize my technical skills and contribute to innovative
+                projects while continuously growing as a full-stack developer.</p>
+            </div>
+
+            <h3 class="soft-skills-title">Soft Skills</h3>
+            <div class="soft-skills stagger">
+              <span class="skill-tag"><i class="fas fa-brain"></i> Problem Solving</span>
+              <span class="skill-tag"><i class="fas fa-users"></i> Team Collaboration</span>
+              <span class="skill-tag"><i class="fas fa-comments"></i> Communication</span>
+              <span class="skill-tag"><i class="fas fa-clock"></i> Time Management</span>
+              <span class="skill-tag"><i class="fas fa-lightbulb"></i> Creativity</span>
+              <span class="skill-tag"><i class="fas fa-sync"></i> Adaptability</span>
+            </div>
           </div>
         </div>
-        
-        <div class="skills-section">
-          <h3>Technical Skills</h3>
-          <div class="skills-grid">
-            <div class="skill-item">
-              <div class="skill-header">
-                <i class="fa-brands fa-node-js" style="margin-right: .1rem;"></i>
-                 <span>JavaScript</span> 
+
+        <!-- Right: skills -->
+        <div class="skills-section anim-hidden">
+          <div class="glowcard">
+            <h3>Technical Skills</h3>
+            <div class="skills-grid">
+              <div class="skill-item">
+                <div class="skill-header">
+                  <span><i class="fa-brands fa-js" style="color:#f7df1e"></i> JavaScript</span>
+                  <span class="skill-pct">95%</span>
+                </div>
+                <div class="skill-bar">
+                  <div class="skill-progress" data-width="95"></div>
+                </div>
               </div>
-              <div class="skill-bar">
-                <div class="skill-progress" data-width="95"></div>
+              <div class="skill-item">
+                <div class="skill-header">
+                  <span><i class="fa-brands fa-react" style="color:#61dafb"></i> React</span>
+                  <span class="skill-pct">88%</span>
+                </div>
+                <div class="skill-bar">
+                  <div class="skill-progress" data-width="88"></div>
+                </div>
               </div>
-            </div>
-            <div class="skill-item">
-              <div class="skill-header">
-                <i class="fa-brands fa-react" style="margin-right: .1rem;"></i>
-                <span>React</span>
-              <div class="skill-bar">
-                <div class="skill-progress" data-width="88"></div>
+              <div class="skill-item">
+                <div class="skill-header">
+                  <span><i class="fa-brands fa-node-js" style="color:#68a063"></i> Node.js</span>
+                  <span class="skill-pct">85%</span>
+                </div>
+                <div class="skill-bar">
+                  <div class="skill-progress" data-width="85"></div>
+                </div>
               </div>
-            </div>
-            <div class="skill-item">
-              <div class="skill-header">
-                <i class="fa-brands fa-node" style="margin-right: .1rem;"></i>
-                 <span>Node.js</span>
+              <div class="skill-item">
+                <div class="skill-header">
+                  <span><i class="fas fa-code" style="color:#a855f7"></i> C++</span>
+                  <span class="skill-pct">90%</span>
+                </div>
+                <div class="skill-bar">
+                  <div class="skill-progress" data-width="90"></div>
+                </div>
               </div>
-              <div class="skill-bar">
-                <div class="skill-progress" data-width="85"></div>
+              <div class="skill-item">
+                <div class="skill-header">
+                  <span><i class="fa-brands fa-python" style="color:#3572A5"></i> Python</span>
+                  <span class="skill-pct">82%</span>
+                </div>
+                <div class="skill-bar">
+                  <div class="skill-progress" data-width="82"></div>
+                </div>
               </div>
-            </div>
-            <div class="skill-item">
-              <div class="skill-header">
-                <i class="fa-brands fa-cpp" style="margin-right: .1rem;"></i>
-                <span>C++</span>
-              </div>
-              <div class="skill-bar">
-                <div class="skill-progress" data-width="90"></div>
-              </div>
-            </div>
-            <div class="skill-item">
-              <div class="skill-header">
-                <i class="fa-brands fa-python" style="margin-right: .1rem;"></i>
-                <span>Python</span>
-              </div>
-              <div class="skill-bar">
-                <div class="skill-progress" data-width="82"></div>
-              </div>
-            </div>
-            <div class="skill-item">
-              <div class="skill-header">
-                <i class="fa-solid fa-database" style="margin-right: .1rem;"></i>
-                <span>Database</span>
-              </div>
-              <div class="skill-bar">
-                <div class="skill-progress" data-width="78"></div>
+              <div class="skill-item">
+                <div class="skill-header">
+                  <span><i class="fa-solid fa-database" style="color:#f59e0b"></i> Database</span>
+                  <span class="skill-pct">78%</span>
+                </div>
+                <div class="skill-bar">
+                  <div class="skill-progress" data-width="78"></div>
+                </div>
               </div>
             </div>
           </div>
@@ -191,180 +270,210 @@
       </div>
     </div>
   </section>
-<hr class="section-divider">
-  <!-- Experience Section -->
-<section id="experience" class="section">
+
+  <hr class="section-divider">
+
+  <!-- ── Experience ────────────────────── -->
+  <section id="experience" class="section">
     <div class="container">
-        <h2 class="section-title">Experience</h2>
+      <div class="section-header anim-hidden">
+        <span class="section-label">// experience</span>
+        <h2 class="section-title">My <span class="highlight">Journey</span></h2>
+        <p class="section-desc">Roles that shaped my skills and perspective as a developer.</p>
+      </div>
 
-        <div class="experience-container">
+      <div class="experience-container stagger">
 
-            <div class="experience-card">
-                <div class="experience-date">Jan 2025 – Present</div>
-                <h3>Web Development Intern</h3>
-                <h4>TechSolutions Pvt Ltd</h4>
-                <ul>
-                    <li>Developed responsive web applications using React and Node.js</li>
-                    <li>Implemented RESTful APIs and database optimization</li>
-                    <li>Collaborated with design team for pixel-perfect UI</li>
-                </ul>
-            </div>
-
-            <div class="experience-card">
-                <div class="experience-date">Jun 2024 – Dec 2024</div>
-                <h3>Software Development Trainee</h3>
-                <h4>CodeCraft Academy</h4>
-                <ul>
-                    <li>Mastered Data Structures & Algorithms implementation</li>
-                    <li>Built full-stack applications</li>
-                    <li>Participated in competitive programming</li>
-                </ul>
-            </div>
-
-            <div class="experience-card">
-                <div class="experience-date">Mar 2024 – May 2024</div>
-                <h3>IoT Project Developer</h3>
-                <h4>University Research Lab</h4>
-                <ul>
-                    <li>Designed IoT monitoring system</li>
-                    <li>Developed real-time dashboard</li>
-                    <li>Integrated hardware sensors</li>
-                </ul>
-            </div>
-
+        <div class="experience-card anim-hidden">
+          <div class="exp-icon"><i class="fas fa-globe"></i></div>
+          <div class="experience-date">Jan 2025 – Present</div>
+          <h3>Web Development Intern</h3>
+          <h4>TechSolutions Pvt Ltd</h4>
+          <ul>
+            <li>Developed responsive web applications using React and Node.js</li>
+            <li>Implemented RESTful APIs and database optimizations</li>
+            <li>Collaborated with design team for pixel-perfect UI</li>
+          </ul>
         </div>
-    </div>
-</section>
 
-<hr>
-  <!-- Projects Section -->
+        <div class="experience-card anim-hidden">
+          <div class="exp-icon"><i class="fas fa-laptop-code"></i></div>
+          <div class="experience-date">Jun 2024 - Dec 2024</div>
+          <h3>Software Development Trainee</h3>
+          <h4>CodeCraft Academy</h4>
+          <ul>
+            <li>Mastered Data Structures &amp; Algorithms implementation</li>
+            <li>Built full-stack applications end-to-end</li>
+            <li>Participated in competitive programming contests</li>
+          </ul>
+        </div>
+
+        <div class="experience-card anim-hidden">
+          <div class="exp-icon"><i class="fas fa-microchip"></i></div>
+          <div class="experience-date">Mar 2024 - May 2024</div>
+          <h3>IoT Project Developer</h3>
+          <h4>University Research Lab</h4>
+          <ul>
+            <li>Designed IoT monitoring system architecture</li>
+            <li>Developed real-time dashboard with live data</li>
+            <li>Integrated hardware sensors with cloud backend</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <hr>
+
+  <!-- ── Projects ──────────────────────── -->
   <section id="projects" class="section projects">
     <div class="container">
-      <h2 class="section-title">Projects</h2>
-      
+      <div class="section-header anim-hidden">
+        <span class="section-label">// projects</span>
+        <h2 class="section-title">Things I've <span class="highlight">Built</span></h2>
+        <p class="section-desc">A collection of projects that reflect my passion for crafting elegant solutions.</p>
+      </div>
+
       <div class="projects-grid">
-        <div class="project-card reveal">
+
+        <div class="project-card">
           <div class="project-image">
             <img src="image/e_commerce.jpg" alt="E-Commerce Platform">
             <div class="project-overlay">
-              <div class="project-links">
-                <a href="https://abhay-maddheshiya.github.io/Amazon-Clone/" class="project-link" aria-label="View Live Demo">
-                  <i class="fas fa-external-link-alt"></i>
-                </a>
-                <a href="https://github.com/abhay-maddheshiya/Amazon-Clone" class="project-link" aria-label="View GitHub">
-                  <i class="fab fa-github"></i>
-                </a>
-              </div>
+              <a href="https://abhay-maddy.github.io/Amazon-Clone/" class="project-link" target="_blank" rel="noopener"
+                aria-label="View Live Demo">
+                <i class="fas fa-external-link-alt"></i>
+              </a>
+              <a href="https://github.com/abhay-maddheshiya/Amazon-Clone" class="project-link" target="_blank"
+                rel="noopener" aria-label="View GitHub">
+                <i class="fab fa-github"></i>
+              </a>
             </div>
           </div>
           <div class="project-content">
             <h3>E-Commerce Platform</h3>
-            <p>Full-stack e-commerce solution with payment integration, admin dashboard, and advanced search functionality.</p>
+            <p>Full-stack e-commerce solution with payment integration, admin dashboard, and advanced search
+              functionality.</p>
             <div class="project-tech">
-              <span style="color: white;"><i class="fa-brands fa-react" style="margin-right: .3rem;"></i>React</span>
-              <span style="color: white;"><i class="fa-brands fa-node-js" style="margin-right: .3rem;"></i>Node.js</span>
-              <span style="color: white;"><i class="fa-solid fa-database" style="margin-right: .3rem;"></i>MongoDB</span>
-              <span style="color: white;"><i class="fa-brands fa-tailwind-css" style="margin-right: .3rem;"></i>Tailwind</span>
+              <span><i class="fa-brands fa-react"></i> React</span>
+              <span><i class="fa-brands fa-node-js"></i> Node.js</span>
+              <span><i class="fa-solid fa-database"></i> MongoDB</span>
+              <span><i class="fas fa-wind"></i> Tailwind</span>
             </div>
           </div>
         </div>
-        
-        <div class="project-card reveal">
+
+        <div class="project-card">
           <div class="project-image">
             <img src="image/TaskManagerApp.jpg" alt="Task Management App" loading="lazy">
             <div class="project-overlay">
-              <div class="project-links">
-                <a href="#" class="project-link" aria-label="View Live Demo">
-                  <i class="fas fa-external-link-alt"></i>
-                </a>
-                <a href="#" class="project-link" aria-label="View GitHub">
-                  <i class="fab fa-github"></i>
-                </a>
-              </div>
+              <a href="#" class="project-link" aria-label="View Live Demo">
+                <i class="fas fa-external-link-alt"></i>
+              </a>
+              <a href="#" class="project-link" aria-label="View GitHub">
+                <i class="fab fa-github"></i>
+              </a>
             </div>
           </div>
           <div class="project-content">
             <h3>Task Management App</h3>
-            <p>Collaborative task manager with real-time updates, drag & drop interface, and team collaboration features.</p>
+            <p>Collaborative task manager with real-time updates, drag &amp; drop interface, and team collaboration
+              features.</p>
             <div class="project-tech">
-              <span style="color: white;"><i class="fa-brands fa-nextjs" style="margin-right: .3rem;"></i>Next.js</span>
-              <span style="color: white;"><i class="fa-brands fa-socket-io" style="margin-right: .3rem;"></i>Socket.io</span>
-              <span style="color: white;"><i class="fa-solid fa-database" style="margin-right: .3rem;"></i>PostgreSQL</span>
+              <span><i class="fab fa-react"></i> Next.js</span>
+              <span><i class="fas fa-bolt"></i> Socket.io</span>
+              <span><i class="fa-solid fa-database"></i> PostgreSQL</span>
             </div>
           </div>
         </div>
-        
-        <div class="project-card reveal">
+
+        <div class="project-card">
           <div class="project-image">
             <img src="image/IOTmonitoring.png" alt="IoT Dashboard" loading="lazy">
             <div class="project-overlay">
-              <div class="project-links">
-                <a href="#" class="project-link" aria-label="View Live Demo">
-                  <i class="fas fa-external-link-alt"></i>
-                </a>
-                <a href="#" class="project-link" aria-label="View GitHub">
-                  <i class="fab fa-github"></i>
-                </a>
-              </div>
+              <a href="#" class="project-link" aria-label="View Live Demo">
+                <i class="fas fa-external-link-alt"></i>
+              </a>
+              <a href="#" class="project-link" aria-label="View GitHub">
+                <i class="fab fa-github"></i>
+              </a>
             </div>
           </div>
           <div class="project-content">
             <h3>IoT Monitoring Dashboard</h3>
-            <p>Real-time IoT data visualization platform with predictive analytics and alert system.</p>
+            <p>Real-time IoT data visualization platform with predictive analytics and intelligent alert system.</p>
             <div class="project-tech">
-              <span style="color: white;"><i class="fa-brands fa-vuejs" style="margin-right: .3rem;"></i>Vue.js</span>
-              <span style="color: white;"><i class="fa-brands fa-python" style="margin-right: .3rem;"></i>Python</span>
-              <span style="color: white;"><i class="fa-solid fa-wifi" style="margin-right: .3rem;"></i>MQTT</span>
-              <span style="color: white;"><i class="fa-solid fa-chart-line" style="margin-right: .3rem;"></i>Chart.js</span>
+              <span><i class="fa-brands fa-vuejs"></i> Vue.js</span>
+              <span><i class="fa-brands fa-python"></i> Python</span>
+              <span><i class="fa-solid fa-wifi"></i> MQTT</span>
+              <span><i class="fa-solid fa-chart-line"></i> Chart.js</span>
             </div>
           </div>
         </div>
+
       </div>
     </div>
   </section>
-<hr>
-  <!-- Resume Section -->
+
+  <hr>
+
+  <!-- ── Resume ────────────────────────── -->
   <section id="resume" class="section resume">
     <div class="container">
-      <h2 class="section-title">Resume</h2>
-      
-      <div class="resume-content">
+      <div class="section-header anim-hidden">
+        <span class="section-label">// resume</span>
+        <h2 class="section-title">My <span class="highlight">Resume</span></h2>
+        <p class="section-desc">A snapshot of my education, experience, and skills.</p>
+      </div>
+
+      <div class="resume-content anim-hidden">
         <div class="resume-preview">
-          <iframe src="image/resume.jpg" title="Resume Preview" frameborder="0"></iframe>
+          <iframe src="image/Resume-Photo.jpg" title="Resume Preview" frameborder="0"></iframe>
         </div>
         <div class="resume-actions">
-          <a href="image/resume.pdf" class="btn btn-primary btn-large" download>
+          <a href="image/Resume.pdf" class="btn btn-primary" download>
             <i class="fas fa-download"></i>
-            Download Resume (PDF)
+            Download PDF
+          </a>
+          <a href="image/Resume.pdf" class="btn btn-ghost" target="_blank">
+            <i class="fas fa-eye"></i>
+            View Full Screen
           </a>
         </div>
       </div>
     </div>
   </section>
-<hr>
-  <!-- Contact Section -->
+
+  <hr>
+
+  <!-- ── Contact ───────────────────────── -->
   <section id="contact" class="section contact">
     <div class="container">
-      <h2 class="section-title">Contact Me</h2>
-      
+      <div class="section-header anim-hidden">
+        <span class="section-label">// contact</span>
+        <h2 class="section-title">Get In <span class="highlight">Touch</span></h2>
+        <p class="section-desc">Have a project in mind or just want to say hello? I'd love to hear from you.</p>
+      </div>
+
       <div class="contact-content">
-        <div class="contact-info">
+        <div class="contact-info anim-hidden">
           <div class="contact-item">
-            <i class="fas fa-envelope"></i>
+            <div class="contact-icon"><i class="fas fa-envelope"></i></div>
             <div>
               <h3>Email</h3>
               <a href="mailto:abhaymaddheshiya159@gmail.com">abhaymaddheshiya159@gmail.com</a>
             </div>
           </div>
           <div class="contact-item">
-            <i class="fas fa-phone"></i>
+            <div class="contact-icon"><i class="fas fa-phone"></i></div>
             <div>
               <h3>Phone</h3>
               <a href="tel:+919044361455">+91 9044361455</a>
             </div>
           </div>
           <div class="contact-item">
-            <i class="fas fa-map-marker-alt"></i>
+            <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
             <div>
               <h3>Location</h3>
               <p>Delhi, India</p>
@@ -372,75 +481,97 @@
           </div>
 
           <div class="social-links">
-            <a href="https://www.linkedin.com/in/abhay-maddheshiya-138b92327/" class="social-link" aria-label="LinkedIn">
+            <a href="https://www.linkedin.com/in/abhay-maddheshiya-138b92327/" class="social-link" target="_blank"
+              rel="noopener" aria-label="LinkedIn">
               <i class="fab fa-linkedin-in"></i>
             </a>
-            <a href="https://github.com/abhay-maddheshiya" class="social-link" aria-label="GitHub">
+            <a href="https://github.com/abhay-maddheshiya" class="social-link" target="_blank" rel="noopener"
+              aria-label="GitHub">
               <i class="fab fa-github"></i>
             </a>
-            <a href="https://www.instagram.com/abhay_maddy_/" class="social-link" aria-label="Instagram">
+            <a href="https://www.instagram.com/abhay_maddy_/" class="social-link" target="_blank" rel="noopener"
+              aria-label="Instagram">
               <i class="fab fa-instagram"></i>
             </a>
-            <a href="https://x.com/Abhay_Maddy_" class="social-link" aria-label="Twitter">
+            <a href="https://x.com/Abhay_Maddy_" class="social-link" target="_blank" rel="noopener"
+              aria-label="Twitter/X">
               <i class="fab fa-twitter"></i>
             </a>
           </div>
         </div>
-        
-        <form id="contactForm" class="contact-form">
+
+        <form id="contactForm" class="contact-form anim-hidden">
           <div class="form-group">
-            <label for="contactName">Name</label>
-            <input type="text" id="contactName" name="name" required>
+            <label for="contactName">Your Name</label>
+            <input type="text" id="contactName" name="name" placeholder="Abhay Maddheshiya" required>
           </div>
           <div class="form-group">
-            <label for="contactEmail">Email</label>
-            <input type="email" id="contactEmail" name="email" required>
+            <label for="contactEmail">Email Address</label>
+            <input type="email" id="contactEmail" name="email" placeholder="abhay@example.com" required>
           </div>
           <div class="form-group">
             <label for="contactSubject">Subject</label>
-            <input type="text" id="contactSubject" name="subject" required>
+            <input type="text" id="contactSubject" name="subject" placeholder="Project Collaboration" required>
           </div>
           <div class="form-group">
             <label for="contactMessage">Message</label>
-            <textarea id="contactMessage" name="message" rows="6" required></textarea>
+            <textarea id="contactMessage" name="message" rows="5" placeholder="Tell me about your project..."
+              required></textarea>
           </div>
-          <button type="submit" class="btn btn-primary btn-large">Send Message</button>
+          <button type="submit" id="submitBtn" class="btn btn-primary" style="width:100%;justify-content:center;">
+            <i class="fas fa-paper-plane"></i>
+            Send Message
+          </button>
         </form>
       </div>
-      
     </div>
   </section>
-<hr>
-  <!-- Footer -->
+
+  <hr>
+
+  <!-- ── Footer ────────────────────────── -->
   <footer class="footer">
     <div class="container">
       <div class="footer-content">
         <div class="footer-brand">
           <a href="#home" class="logo">
             <span class="logo-mark">AM</span>
+            <span class="logo-text">Abhay</span>
           </a>
-          <p>&copy; 2026 Abhay Maddheshiya. All rights reserved.</p>
+          <p>Building elegant digital experiences<br>one line of code at a time.</p>
         </div>
-        
+
         <div class="footer-links">
           <a href="#home">Home</a>
+          <a href="#about">About</a>
           <a href="#projects">Projects</a>
           <a href="#contact">Contact</a>
         </div>
-        
+
         <div class="footer-social">
-          <a href="https://www.linkedin.com/in/abhay-maddheshiya-138b92327/" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-          <a href="https://github.com/abhay-maddheshiya" aria-label="GitHub"><i class="fab fa-github"></i></a>
-          <a href="https://www.instagram.com/abhay_maddy_/" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+          <a href="https://www.linkedin.com/in/abhay-maddheshiya-138b92327/" target="_blank" rel="noopener"
+            aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+          <a href="https://github.com/abhay-maddheshiya" target="_blank" rel="noopener" aria-label="GitHub"><i
+              class="fab fa-github"></i></a>
+          <a href="https://www.instagram.com/abhay_maddy_/" target="_blank" rel="noopener" aria-label="Instagram"><i
+              class="fab fa-instagram"></i></a>
+          <a href="https://x.com/Abhay_Maddy_" target="_blank" rel="noopener" aria-label="Twitter"><i
+              class="fab fa-twitter"></i></a>
         </div>
       </div>
-      
-      <a href="#home" id="back-to-top" class="back-to-top" aria-label="Back to top">
-        <i class="fa-solid fa-angles-up fa-flip"></i>
-      </a>
+
+      <div class="footer-bottom">
+        <p>&copy; 2026 <span>Abhay Maddheshiya</span>. Crafted with <span>♥</span> &amp; passion.</p>
+      </div>
     </div>
   </footer>
 
-  <script src="script.js"></script>
+  <!-- Back to top -->
+  <a href="#home" id="back-to-top" class="back-to-top" aria-label="Back to top">
+    <i class="fas fa-chevron-up"></i>
+  </a>
+
+  <script src="script.js?v=3"></script>
 </body>
+
 </html>

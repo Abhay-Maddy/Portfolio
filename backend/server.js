@@ -4,7 +4,8 @@ const express = require("express");
 const nodemailer = require("nodemailer");
 
 const app = express();
-app.use(cors());
+// Open CORS — accepts requests from localhost, GitHub Pages, or any domain
+app.use(cors({ origin: "*", methods: ["GET","POST","OPTIONS"], allowedHeaders: ["Content-Type"] }));
 app.use(express.json());
 
 app.post("/send", async (req, res) => {
