@@ -77,7 +77,7 @@ app.post("/send", async (req, res) => {
     timestamp: new Date().toISOString()
   };
 
-  // 1. Always save message locally first
+  // 1. Always save message locally first so no message is lost
   saveMessageLocally(msgEntry);
 
   const emailUser = process.env.EMAIL;
@@ -85,22 +85,26 @@ app.post("/send", async (req, res) => {
   const cleanPassword = rawPass.replace(/\s+/g, "");
 
   if (!emailUser || !cleanPassword) {
-    return res.json({ success: true, message: "Message saved! (Email credentials pending)" });
+    console.warn("⚠️ EMAIL or PASSWORD environment variables missing.");
+    return res.json({ success: true, message: "Message received & saved! (Environment variables missing on server)" });
   }
 
   try {
+    // Port 587 with STARTTLS works much better across cloud providers (Render, AWS)
     const transporter = nodemailer.createTransport({
-      service: "gmail",
-      connectionTimeout: 4000,
-      greetingTimeout: 4000,
-      socketTimeout: 4000,
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false,
+      requireTLS: true,
+      connectionTimeout: 5000,
+      greetingTimeout: 5000,
+      socketTimeout: 5000,
       auth: {
         user: emailUser,
         pass: cleanPassword
       }
     });
 
-    // Send email with 6-second timeout race to prevent hanging on cloud servers
     const sendPromise = transporter.sendMail({
       from: emailUser,
       to: emailUser,
@@ -117,7 +121,7 @@ ${message}
     });
 
     const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error("Email send timeout")), 6000)
+      setTimeout(() => reject(new Error("Email send timeout")), 7000)
     );
 
     await Promise.race([sendPromise, timeoutPromise]);
@@ -130,7 +134,8 @@ ${message}
     return res.json({ 
       success: true, 
       message: "Message received! I'll reply soon.",
-      savedLocally: true
+      savedLocally: true,
+      mailError: err.message
     });
   }
 });
