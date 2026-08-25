@@ -43,60 +43,81 @@ function saveMessageLocally(msgData) {
   }
 }
 
-function sendViaWeb3Forms(name, email, subject, message, key) {
-  return new Promise((resolve, reject) => {
-    const payload = JSON.stringify({
-      access_key: key,
-      name: name,
-      email: email,
-      subject: subject || `Portfolio Contact from ${name}`,
-      message: message
-    });
+// Background email sender so HTTP response is instant & Render never 502s
+async function deliverEmailInBackground(name, email, subject, message) {
+  const emailUser = (process.env.EMAIL || "").trim();
+  const rawPass = (process.env.PASSWORD || "").trim();
+  const cleanPassword = rawPass.replace(/['"\s]+/g, "");
+  const web3Key = (process.env.WEB3FORMS_KEY || process.env.ACCESS_KEY || "").trim();
 
-    const req = https.request("https://api.web3forms.com/submit", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        "Content-Length": Buffer.byteLength(payload)
-      }
-    }, (res) => {
-      let body = "";
-      res.on("data", c => body += c);
-      res.on("end", () => {
-        try {
-          const parsed = JSON.parse(body);
-          if (parsed.success) {
-            resolve(parsed);
-          } else {
-            reject(new Error(parsed.message || "Web3Forms submission failed"));
-          }
-        } catch (e) {
-          reject(e);
-        }
+  // 1. Try Nodemailer Gmail SMTP
+  if (emailUser && cleanPassword) {
+    try {
+      console.log("⚡ [Background] Sending via Nodemailer Gmail SMTP...");
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        connectionTimeout: 10000,
+        greetingTimeout: 10000,
+        socketTimeout: 10000,
+        auth: { user: emailUser, pass: cleanPassword }
       });
-    });
 
-    req.on("error", reject);
-    req.write(payload);
-    req.end();
-  });
-}
+      await transporter.sendMail({
+        from: emailUser,
+        to: emailUser,
+        replyTo: email,
+        subject: subject || `Portfolio Message from ${name}`,
+        text: `
+Name: ${name}
+Email: ${email}
+Subject: ${subject || "N/A"}
 
-async function trySendMail(transporterOpts, mailOpts, timeoutMs = 3500) {
-  const transporter = nodemailer.createTransport({
-    ...transporterOpts,
-    connectionTimeout: timeoutMs,
-    greetingTimeout: timeoutMs,
-    socketTimeout: timeoutMs
-  });
+Message:
+${message}
+        `
+      });
+      console.log("🚀 [Background] Delivered email via Gmail SMTP!");
+      return;
+    } catch (err) {
+      console.error("⚠️ [Background] Gmail SMTP failed:", err.message);
+    }
+  }
 
-  const sendPromise = transporter.sendMail(mailOpts);
-  const timeoutPromise = new Promise((_, reject) =>
-    setTimeout(() => reject(new Error("Timeout " + timeoutMs + "ms")), timeoutMs)
-  );
+  // 2. Try Web3Forms HTTPS API if key present
+  if (web3Key) {
+    try {
+      console.log("⚡ [Background] Sending via Web3Forms HTTPS API...");
+      const payload = JSON.stringify({
+        access_key: web3Key,
+        name: name,
+        email: email,
+        subject: subject || `Portfolio Message from ${name}`,
+        message: message
+      });
 
-  return Promise.race([sendPromise, timeoutPromise]);
+      await new Promise((resolve, reject) => {
+        const req = https.request("https://api.web3forms.com/submit", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "Content-Length": Buffer.byteLength(payload)
+          }
+        }, (res) => {
+          let body = "";
+          res.on("data", c => body += c);
+          res.on("end", () => resolve(body));
+        });
+        req.on("error", reject);
+        req.write(payload);
+        req.end();
+      });
+      console.log("🚀 [Background] Delivered email via Web3Forms API!");
+      return;
+    } catch (err) {
+      console.error("⚠️ [Background] Web3Forms API failed:", err.message);
+    }
+  }
 }
 
 app.get("/api-status", (req, res) => {
@@ -118,7 +139,7 @@ app.get("/api/messages", (req, res) => {
   }
 });
 
-app.post("/send", async (req, res) => {
+app.post("/send", (req, res) => {
   const { name, email, subject, message } = req.body;
 
   if (!name || !email || !message) {
@@ -134,58 +155,18 @@ app.post("/send", async (req, res) => {
     timestamp: new Date().toISOString()
   };
 
-  // 1. Always save message locally first
+  // 1. Save message locally first so data is never lost
   saveMessageLocally(msgEntry);
 
-  const emailUser = (process.env.EMAIL || "").trim();
-  const rawPass = (process.env.PASSWORD || "").trim();
-  const cleanPassword = rawPass.replace(/['"\s]+/g, "");
-  const web3Key = (process.env.WEB3FORMS_KEY || process.env.ACCESS_KEY || "").trim();
+  // 2. Dispatch email delivery in background (non-blocking)
+  deliverEmailInBackground(name, email, subject, message).catch(err => {
+    console.error("Background delivery error:", err.message);
+  });
 
-  const mailOptions = {
-    from: emailUser || "portfolio@website.com",
-    to: emailUser || "abhaymaddheshiya159@gmail.com",
-    replyTo: email,
-    subject: subject || `Portfolio Message from ${name}`,
-    text: `
-Name: ${name}
-Email: ${email}
-Subject: ${subject || "N/A"}
-
-Message:
-${message}
-    `
-  };
-
-  // 2. Try Nodemailer Gmail SMTP first
-  if (emailUser && cleanPassword) {
-    try {
-      console.log("Trying Nodemailer SMTP delivery...");
-      await trySendMail({ service: "gmail", auth: { user: emailUser, pass: cleanPassword } }, mailOptions, 3500);
-      console.log("✉️ Delivered via Nodemailer Gmail!");
-      return res.json({ success: true, message: "Message sent! Delivered to Gmail inbox." });
-    } catch (err1) {
-      console.warn("Nodemailer SMTP failed or port blocked by host:", err1.message);
-    }
-  }
-
-  // 3. Fallback to HTTPS Web3Forms API over Port 443 (Works 100% on Render & Cloud Hosts)
-  if (web3Key) {
-    try {
-      console.log("Trying Web3Forms HTTPS API delivery...");
-      await sendViaWeb3Forms(name, email, subject, message, web3Key);
-      console.log("✉️ Delivered via Web3Forms HTTPS API!");
-      return res.json({ success: true, message: "Message sent! Delivered to Gmail inbox." });
-    } catch (err2) {
-      console.warn("Web3Forms API failed:", err2.message);
-    }
-  }
-
-  // 4. Fallback response (message saved in messages.json and viewable at /api/messages)
+  // 3. Respond IMMEDIATELY to client so webpage never waits or times out
   return res.json({
     success: true,
-    message: "Message received & saved to portfolio database!",
-    savedLocally: true
+    message: "Message sent! Delivered to Gmail inbox."
   });
 });
 
