@@ -363,9 +363,7 @@ document.querySelectorAll('.project-card').forEach(function (card) {
   var form = document.getElementById('contactForm');
   if (!form) return;
 
-  var API = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-    ? '/send'
-    : 'https://portfolio-qtln.onrender.com/send';
+  var API = '/send';
 
   form.addEventListener('submit', function (e) {
     e.preventDefault();
