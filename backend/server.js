@@ -43,22 +43,23 @@ function saveMessageLocally(msgData) {
   }
 }
 
-// Background email sender so HTTP response is instant & Render never 502s
-async function deliverEmailInBackground(name, email, subject, message) {
+async function deliverEmail(name, email, subject, message) {
   const emailUser = (process.env.EMAIL || "").trim();
   const rawPass = (process.env.PASSWORD || "").trim();
   const cleanPassword = rawPass.replace(/['"\s]+/g, "");
   const web3Key = (process.env.WEB3FORMS_KEY || process.env.ACCESS_KEY || "").trim();
 
+  let errors = [];
+
   // 1. Try Nodemailer Gmail SMTP
   if (emailUser && cleanPassword) {
     try {
-      console.log("⚡ [Background] Sending via Nodemailer Gmail SMTP...");
+      console.log("⚡ Attempting Nodemailer Gmail SMTP...");
       const transporter = nodemailer.createTransport({
         service: "gmail",
-        connectionTimeout: 10000,
-        greetingTimeout: 10000,
-        socketTimeout: 10000,
+        connectionTimeout: 4000,
+        greetingTimeout: 4000,
+        socketTimeout: 4000,
         auth: { user: emailUser, pass: cleanPassword }
       });
 
@@ -76,17 +77,20 @@ Message:
 ${message}
         `
       });
-      console.log("🚀 [Background] Delivered email via Gmail SMTP!");
-      return;
+      console.log("🚀 Email delivered via Gmail SMTP!");
+      return { success: true };
     } catch (err) {
-      console.error("⚠️ [Background] Gmail SMTP failed:", err.message);
+      console.error("⚠️ Gmail SMTP failed:", err.message);
+      errors.push("SMTP: " + err.message);
     }
+  } else {
+    errors.push("SMTP: Missing EMAIL or PASSWORD credentials");
   }
 
-  // 2. Try Web3Forms HTTPS API if key present
+  // 2. Try Web3Forms HTTPS API (Port 443 - Works 100% on Render & Cloud hosts)
   if (web3Key) {
     try {
-      console.log("⚡ [Background] Sending via Web3Forms HTTPS API...");
+      console.log("⚡ Attempting Web3Forms HTTPS API over Port 443...");
       const payload = JSON.stringify({
         access_key: web3Key,
         name: name,
@@ -95,7 +99,7 @@ ${message}
         message: message
       });
 
-      await new Promise((resolve, reject) => {
+      const body = await new Promise((resolve, reject) => {
         const req = https.request("https://api.web3forms.com/submit", {
           method: "POST",
           headers: {
@@ -104,20 +108,31 @@ ${message}
             "Content-Length": Buffer.byteLength(payload)
           }
         }, (res) => {
-          let body = "";
-          res.on("data", c => body += c);
-          res.on("end", () => resolve(body));
+          let b = "";
+          res.on("data", c => b += c);
+          res.on("end", () => resolve(b));
         });
         req.on("error", reject);
         req.write(payload);
         req.end();
       });
-      console.log("🚀 [Background] Delivered email via Web3Forms API!");
-      return;
+
+      const parsed = JSON.parse(body || "{}");
+      if (parsed.success) {
+        console.log("🚀 Email delivered via Web3Forms HTTPS API!");
+        return { success: true };
+      } else {
+        errors.push("Web3Forms API: " + (parsed.message || "API rejected payload"));
+      }
     } catch (err) {
-      console.error("⚠️ [Background] Web3Forms API failed:", err.message);
+      console.error("⚠️ Web3Forms API failed:", err.message);
+      errors.push("Web3Forms API: " + err.message);
     }
+  } else {
+    errors.push("Web3Forms: WEB3FORMS_KEY environment variable not set on server");
   }
+
+  return { success: false, error: errors.join(" | ") };
 }
 
 app.get("/api-status", (req, res) => {
@@ -143,7 +158,7 @@ app.get("/send", (req, res) => {
   res.redirect("/");
 });
 
-app.post("/send", (req, res) => {
+app.post("/send", async (req, res) => {
   const { name, email, subject, message } = req.body;
 
   if (!name || !email || !message) {
@@ -162,16 +177,21 @@ app.post("/send", (req, res) => {
   // 1. Save message locally first so data is never lost
   saveMessageLocally(msgEntry);
 
-  // 2. Dispatch email delivery in background (non-blocking)
-  deliverEmailInBackground(name, email, subject, message).catch(err => {
-    console.error("Background delivery error:", err.message);
-  });
+  // 2. Deliver email synchronously and verify actual inbox delivery status
+  const delivery = await deliverEmail(name, email, subject, message);
 
-  // 3. Respond IMMEDIATELY to client so webpage never waits or times out
-  return res.json({
-    success: true,
-    message: "Message sent! Delivered to Gmail inbox."
-  });
+  if (delivery.success) {
+    return res.json({
+      success: true,
+      message: "Message sent successfully! Check your Gmail inbox."
+    });
+  } else {
+    console.error("❌ EMAIL DELIVERY FAILED:", delivery.error);
+    return res.status(500).json({
+      success: false,
+      message: "Email delivery failed: " + delivery.error
+    });
+  }
 });
 
 const PORT = process.env.PORT || 5000;
