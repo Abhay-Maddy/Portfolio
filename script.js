@@ -364,6 +364,8 @@ document.querySelectorAll('.project-card').forEach(function (card) {
   if (!form) return;
 
   var API = '/send';
+  // Web3Forms Access Key for direct client-side email delivery to abhaymaddheshiya159@gmail.com
+  var WEB3FORMS_KEY = window.WEB3FORMS_KEY || '08479e00-2441-4c6e-b3f9-6fa4caec3eb2';
 
   form.addEventListener('submit', function (e) {
     e.preventDefault();
@@ -376,32 +378,38 @@ document.querySelectorAll('.project-card').forEach(function (card) {
 
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending…'; }
 
+    // 1. Store message in server database (messages.json)
     fetch(API, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: name, email: email, subject: subject, message: message })
-    })
-      .then(function (r) {
-        return r.json().catch(function() {
-          return { success: false, message: 'HTTP ' + r.status };
-        }).then(function(data) {
-          if (!r.ok) {
-            return Promise.reject(new Error(data.message || ('HTTP ' + r.status)));
-          }
-          return data;
-        });
+    }).catch(function(err) { console.warn('Backend persistence note:', err); });
+
+    // 2. Deliver email via Web3Forms API directly from client browser (Port 443 - never blocked by cloud firewalls)
+    fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        access_key: WEB3FORMS_KEY,
+        name: name,
+        email: email,
+        subject: subject || ('Portfolio Message from ' + name),
+        message: message
       })
+    })
+      .then(function (r) { return r.json(); })
       .then(function (res) {
         if (res.success) {
-          showToast('✅ Message sent! I\'ll reply soon.', 'success');
+          showToast('✅ Message sent! Delivered directly to Gmail inbox.', 'success');
           form.reset();
         } else {
-          showToast('❌ ' + (res.message || 'Failed to send'), 'error');
+          // If key needs verification or setup
+          showToast('❌ ' + (res.message || 'Failed to deliver email.'), 'error');
         }
       })
       .catch(function (err) {
-        console.error('[Contact]', err);
-        showToast('❌ ' + (err.message || 'Failed to send message'), 'error');
+        console.error('[Web3Forms]', err);
+        showToast('❌ Email delivery error. Please try again.', 'error');
       })
       .finally(function () {
         if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message'; }

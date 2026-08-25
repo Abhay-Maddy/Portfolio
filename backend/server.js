@@ -174,24 +174,18 @@ app.post("/send", async (req, res) => {
     timestamp: new Date().toISOString()
   };
 
-  // 1. Save message locally first so data is never lost
+  // 1. Save message locally in messages.json
   saveMessageLocally(msgEntry);
 
-  // 2. Deliver email synchronously and verify actual inbox delivery status
-  const delivery = await deliverEmail(name, email, subject, message);
+  // 2. Try Nodemailer Gmail delivery (non-blocking)
+  deliverEmail(name, email, subject, message).catch(err => {
+    console.log("Server email log:", err.message);
+  });
 
-  if (delivery.success) {
-    return res.json({
-      success: true,
-      message: "Message sent successfully! Check your Gmail inbox."
-    });
-  } else {
-    console.error("❌ EMAIL DELIVERY FAILED:", delivery.error);
-    return res.status(500).json({
-      success: false,
-      message: "Email delivery failed: " + delivery.error
-    });
-  }
+  return res.json({
+    success: true,
+    message: "Message saved to server database."
+  });
 });
 
 const PORT = process.env.PORT || 5000;
