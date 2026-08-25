@@ -14,10 +14,10 @@ window.addEventListener('load', function () {
 // ── Scroll progress bar ──────────────────────────────────────────
 (function () {
   var bar = document.createElement('div');
-  bar.id  = 'scroll-bar';
+  bar.id = 'scroll-bar';
   document.body.appendChild(bar);
   window.addEventListener('scroll', function () {
-    var h   = document.documentElement;
+    var h = document.documentElement;
     var pct = (window.scrollY / (h.scrollHeight - h.clientHeight)) * 100;
     bar.style.width = pct + '%';
   }, { passive: true });
@@ -25,7 +25,7 @@ window.addEventListener('load', function () {
 
 // ── Custom cursor ────────────────────────────────────────────────
 (function () {
-  var dot  = document.getElementById('cursor-dot');
+  var dot = document.getElementById('cursor-dot');
   var ring = document.getElementById('cursor-ring');
   if (!dot || !ring) return;
 
@@ -34,7 +34,7 @@ window.addEventListener('load', function () {
   document.addEventListener('mousemove', function (e) {
     mx = e.clientX; my = e.clientY;
     dot.style.left = mx + 'px';
-    dot.style.top  = my + 'px';
+    dot.style.top = my + 'px';
     dot.style.opacity = '1';
     ring.style.opacity = '1';
   });
@@ -48,7 +48,7 @@ window.addEventListener('load', function () {
     rx += (mx - rx) * 0.09;
     ry += (my - ry) * 0.09;
     ring.style.left = rx + 'px';
-    ring.style.top  = ry + 'px';
+    ring.style.top = ry + 'px';
     requestAnimationFrame(lerpRing);
   })();
 
@@ -108,7 +108,7 @@ window.addEventListener('load', function () {
   var W, H, pts = [];
 
   function resize() {
-    W = c.width  = window.innerWidth;
+    W = c.width = window.innerWidth;
     H = c.height = window.innerHeight;
   }
   resize();
@@ -147,7 +147,7 @@ window.addEventListener('load', function () {
     for (var i = 0; i < pts.length; i++) {
       for (var j = i + 1; j < pts.length; j++) {
         var dx = pts[i].x - pts[j].x, dy = pts[i].y - pts[j].y;
-        var d  = Math.sqrt(dx * dx + dy * dy);
+        var d = Math.sqrt(dx * dx + dy * dy);
         if (d < 100) {
           ctx.beginPath();
           ctx.moveTo(pts[i].x, pts[i].y);
@@ -189,7 +189,7 @@ window.addEventListener('load', function () {
 
 // ── Theme toggle ─────────────────────────────────────────────────
 (function () {
-  var btn  = document.getElementById('theme-toggle');
+  var btn = document.getElementById('theme-toggle');
   var html = document.documentElement;
   var saved = localStorage.getItem('theme') || 'dark';
   html.setAttribute('data-theme', saved);
@@ -197,7 +197,7 @@ window.addEventListener('load', function () {
 
   if (!btn) return;
   btn.addEventListener('click', function () {
-    var cur  = html.getAttribute('data-theme');
+    var cur = html.getAttribute('data-theme');
     var next = cur === 'dark' ? 'light' : 'dark';
     html.setAttribute('data-theme', next);
     localStorage.setItem('theme', next);
@@ -342,49 +342,56 @@ if (btt) {
 document.querySelectorAll('.project-card, .experience-card, .glowcard').forEach(function (card) {
   card.addEventListener('mousemove', function (e) {
     var r = card.getBoundingClientRect();
-    card.style.setProperty('--mx', ((e.clientX - r.left) / r.width  * 100) + '%');
-    card.style.setProperty('--my', ((e.clientY - r.top)  / r.height * 100) + '%');
+    card.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
+    card.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
   });
 });
 
 // ── 3D tilt on project cards ─────────────────────────────────────
 document.querySelectorAll('.project-card').forEach(function (card) {
   card.addEventListener('mousemove', function (e) {
-    var r  = card.getBoundingClientRect();
-    var dx = (e.clientX - r.left - r.width  / 2) / (r.width  / 2);
-    var dy = (e.clientY - r.top  - r.height / 2) / (r.height / 2);
+    var r = card.getBoundingClientRect();
+    var dx = (e.clientX - r.left - r.width / 2) / (r.width / 2);
+    var dy = (e.clientY - r.top - r.height / 2) / (r.height / 2);
     card.style.transform = 'translateY(-12px) rotateY(' + (dx * 6) + 'deg) rotateX(' + (-dy * 6) + 'deg) scale(1.02)';
   });
   card.addEventListener('mouseleave', function () { card.style.transform = ''; });
 });
 
-// ── Contact form — always uses Render (works locally + GitHub Pages) ──
+// ── Contact form ──
 (function () {
   var form = document.getElementById('contactForm');
   if (!form) return;
 
-  // Always use Render endpoint — CORS is open (*), works from any origin
-  var API = 'https://portfolio-qtln.onrender.com/send';
+  var API = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? '/send'
+    : 'https://portfolio-qtln.onrender.com/send';
 
   form.addEventListener('submit', function (e) {
     e.preventDefault();
 
-    var btn  = form.querySelector('button[type="submit"]');
-    var name    = (document.getElementById('contactName')    || {}).value || '';
-    var email   = (document.getElementById('contactEmail')   || {}).value || '';
+    var btn = form.querySelector('button[type="submit"]');
+    var name = (document.getElementById('contactName') || {}).value || '';
+    var email = (document.getElementById('contactEmail') || {}).value || '';
     var subject = (document.getElementById('contactSubject') || {}).value || '';
     var message = (document.getElementById('contactMessage') || {}).value || '';
 
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending…'; }
 
     fetch(API, {
-      method:  'POST',
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ name: name, email: email, subject: subject, message: message })
+      body: JSON.stringify({ name: name, email: email, subject: subject, message: message })
     })
       .then(function (r) {
-        if (!r.ok) throw new Error('HTTP ' + r.status);
-        return r.json();
+        return r.json().catch(function() {
+          return { success: false, message: 'HTTP ' + r.status };
+        }).then(function(data) {
+          if (!r.ok) {
+            return Promise.reject(new Error(data.message || ('HTTP ' + r.status)));
+          }
+          return data;
+        });
       })
       .then(function (res) {
         if (res.success) {
@@ -396,8 +403,7 @@ document.querySelectorAll('.project-card').forEach(function (card) {
       })
       .catch(function (err) {
         console.error('[Contact]', err);
-        // Render free tier spins down — first request can take ~30s
-        showToast('⏳ Server waking up, try again in 30 seconds', 'warn');
+        showToast('❌ ' + (err.message || 'Failed to send message'), 'error');
       })
       .finally(function () {
         if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message'; }
