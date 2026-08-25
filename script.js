@@ -365,7 +365,7 @@ document.querySelectorAll('.project-card').forEach(function (card) {
 
   var API = '/send';
   // Web3Forms Access Key for direct client-side email delivery to abhaymaddheshiya159@gmail.com
-  var WEB3FORMS_KEY = window.WEB3FORMS_KEY || '08479e00-2441-4c6e-b3f9-6fa4caec3eb2';
+  var WEB3FORMS_KEY = (window.WEB3FORMS_KEY || 'a702fd7f-2f49-4e03-b687-e9e7688397f7').trim();
 
   form.addEventListener('submit', function (e) {
     e.preventDefault();
@@ -383,7 +383,7 @@ document.querySelectorAll('.project-card').forEach(function (card) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: name, email: email, subject: subject, message: message })
-    }).catch(function(err) { console.warn('Backend persistence note:', err); });
+    }).catch(function (err) { console.warn('Backend persistence note:', err); });
 
     // 2. Deliver email via Web3Forms API directly from client browser (Port 443 - never blocked by cloud firewalls)
     fetch('https://api.web3forms.com/submit', {
