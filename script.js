@@ -385,17 +385,15 @@ document.querySelectorAll('.project-card').forEach(function (card) {
       body: JSON.stringify({ name: name, email: email, subject: subject, message: message })
     }).catch(function (err) { console.warn('Backend persistence note:', err); });
 
-    // 2. Deliver email via Web3Forms API directly from client browser (Port 443 - never blocked by cloud firewalls)
+    // 2. Deliver email via Web3Forms API directly using FormData for 100% browser compatibility & Gmail inbox delivery
+    var formData = new FormData(form);
+    if (!formData.get('access_key')) {
+      formData.append('access_key', WEB3FORMS_KEY);
+    }
+
     fetch('https://api.web3forms.com/submit', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify({
-        access_key: WEB3FORMS_KEY,
-        name: name,
-        email: email,
-        subject: subject || ('Portfolio Message from ' + name),
-        message: message
-      })
+      body: formData
     })
       .then(function (r) { return r.json(); })
       .then(function (res) {
