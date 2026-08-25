@@ -7,7 +7,7 @@ const fs = require("fs");
 
 const app = express();
 
-// Enable full CORS for all origins and headers
+// Full CORS support for all origins & preflight
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
@@ -61,6 +61,22 @@ app.get("/api/messages", (req, res) => {
   }
 });
 
+async function trySendMail(transporterOpts, mailOpts, timeoutMs = 3500) {
+  const transporter = nodemailer.createTransport({
+    ...transporterOpts,
+    connectionTimeout: timeoutMs,
+    greetingTimeout: timeoutMs,
+    socketTimeout: timeoutMs
+  });
+
+  const sendPromise = transporter.sendMail(mailOpts);
+  const timeoutPromise = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error("Timeout " + timeoutMs + "ms")), timeoutMs)
+  );
+
+  return Promise.race([sendPromise, timeoutPromise]);
+}
+
 app.post("/send", async (req, res) => {
   const { name, email, subject, message } = req.body;
 
@@ -77,67 +93,86 @@ app.post("/send", async (req, res) => {
     timestamp: new Date().toISOString()
   };
 
-  // 1. Always save message locally first so no message is lost
+  // 1. Always save message locally so no message is ever lost
   saveMessageLocally(msgEntry);
 
-  const emailUser = process.env.EMAIL;
-  const rawPass = process.env.PASSWORD || "";
-  const cleanPassword = rawPass.replace(/\s+/g, "");
+  const emailUser = (process.env.EMAIL || "").trim();
+  const rawPass = (process.env.PASSWORD || "").trim();
+  const cleanPassword = rawPass.replace(/['"\s]+/g, "");
 
   if (!emailUser || !cleanPassword) {
-    console.warn("⚠️ EMAIL or PASSWORD environment variables missing.");
-    return res.json({ success: true, message: "Message received & saved! (Environment variables missing on server)" });
+    console.warn("⚠️ EMAIL or PASSWORD env vars missing on server.");
+    return res.json({ success: true, message: "Message received & saved!" });
   }
 
-  try {
-    // Port 587 with STARTTLS works much better across cloud providers (Render, AWS)
-    const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 587,
-      secure: false,
-      requireTLS: true,
-      connectionTimeout: 5000,
-      greetingTimeout: 5000,
-      socketTimeout: 5000,
-      auth: {
-        user: emailUser,
-        pass: cleanPassword
-      }
-    });
-
-    const sendPromise = transporter.sendMail({
-      from: emailUser,
-      to: emailUser,
-      replyTo: email,
-      subject: subject || `Portfolio Message from ${name}`,
-      text: `
+  const mailOptions = {
+    from: emailUser,
+    to: emailUser,
+    replyTo: email,
+    subject: subject || `Portfolio Message from ${name}`,
+    text: `
 Name: ${name}
 Email: ${email}
 Subject: ${subject || "N/A"}
 
 Message:
 ${message}
-      `
-    });
+    `
+  };
 
-    const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error("Email send timeout")), 7000)
-    );
+  let lastError = null;
 
-    await Promise.race([sendPromise, timeoutPromise]);
-
-    console.log("✉️ Email delivered successfully to inbox!");
+  // Attempt 1: Gmail Service (SSL 465)
+  try {
+    console.log("Attempt 1: Gmail Service 465...");
+    await trySendMail({ service: "gmail", auth: { user: emailUser, pass: cleanPassword } }, mailOptions, 3500);
+    console.log("✉️ Delivered via Gmail Service!");
     return res.json({ success: true, message: "Message sent! I'll reply soon." });
-
-  } catch (err) {
-    console.error("MAIL DELIVERY LOG:", err.message);
-    return res.json({ 
-      success: true, 
-      message: "Message received! I'll reply soon.",
-      savedLocally: true,
-      mailError: err.message
-    });
+  } catch (err1) {
+    lastError = err1;
+    console.warn("Attempt 1 failed:", err1.message);
   }
+
+  // Attempt 2: SMTP 587 STARTTLS
+  try {
+    console.log("Attempt 2: SMTP 587 STARTTLS...");
+    await trySendMail({
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false,
+      requireTLS: true,
+      auth: { user: emailUser, pass: cleanPassword }
+    }, mailOptions, 3500);
+    console.log("✉️ Delivered via SMTP 587!");
+    return res.json({ success: true, message: "Message sent! I'll reply soon." });
+  } catch (err2) {
+    lastError = err2;
+    console.warn("Attempt 2 failed:", err2.message);
+  }
+
+  // Attempt 3: SMTP 465 Explicit
+  try {
+    console.log("Attempt 3: SMTP 465 Direct...");
+    await trySendMail({
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
+      auth: { user: emailUser, pass: cleanPassword }
+    }, mailOptions, 3500);
+    console.log("✉️ Delivered via SMTP 465!");
+    return res.json({ success: true, message: "Message sent! I'll reply soon." });
+  } catch (err3) {
+    lastError = err3;
+    console.warn("Attempt 3 failed:", err3.message);
+  }
+
+  // Fallback if all cloud SMTP ports are blocked by host
+  return res.json({
+    success: true,
+    message: "Message received! I'll reply soon.",
+    savedLocally: true,
+    note: lastError ? lastError.message : "SMTP unavailable"
+  });
 });
 
 const PORT = process.env.PORT || 5000;
