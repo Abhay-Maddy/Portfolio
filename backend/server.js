@@ -7,7 +7,7 @@ const fs = require("fs");
 
 const app = express();
 
-// Full CORS support for all origins & preflight requests
+// Enable full CORS for all origins and headers
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
@@ -36,9 +36,9 @@ function saveMessageLocally(msgData) {
     }
     messages.push(msgData);
     fs.writeFileSync(MESSAGES_FILE, JSON.stringify(messages, null, 2), "utf8");
-    console.log("💾 Message saved locally to messages.json");
+    console.log("💾 Message saved to messages.json");
   } catch (err) {
-    console.error("Failed to save message locally:", err.message);
+    console.error("Failed to save message:", err.message);
   }
 }
 
@@ -49,7 +49,6 @@ app.get("/api-status", (req, res) => {
   });
 });
 
-// Endpoint to view received messages
 app.get("/api/messages", (req, res) => {
   try {
     if (fs.existsSync(MESSAGES_FILE)) {
@@ -78,63 +77,60 @@ app.post("/send", async (req, res) => {
     timestamp: new Date().toISOString()
   };
 
-  // 1. Always save message locally so it is never lost
+  // 1. Always save message locally first
   saveMessageLocally(msgEntry);
-
-  // 2. Attempt Nodemailer SMTP delivery
-  let emailSent = false;
-  let emailError = null;
 
   const emailUser = process.env.EMAIL;
   const rawPass = process.env.PASSWORD || "";
   const cleanPassword = rawPass.replace(/\s+/g, "");
 
-  if (emailUser && cleanPassword) {
-    try {
-      const transporter = nodemailer.createTransport({
-        host: "smtp.gmail.com",
-        port: 465,
-        secure: true,
-        auth: {
-          user: emailUser,
-          pass: cleanPassword
-        }
-      });
+  if (!emailUser || !cleanPassword) {
+    return res.json({ success: true, message: "Message saved! (Email credentials pending)" });
+  }
 
-      await transporter.sendMail({
-        from: emailUser,
-        to: emailUser,
-        replyTo: email,
-        subject: subject || `Portfolio Message from ${name}`,
-        text: `
+  try {
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      connectionTimeout: 4000,
+      greetingTimeout: 4000,
+      socketTimeout: 4000,
+      auth: {
+        user: emailUser,
+        pass: cleanPassword
+      }
+    });
+
+    // Send email with 6-second timeout race to prevent hanging on cloud servers
+    const sendPromise = transporter.sendMail({
+      from: emailUser,
+      to: emailUser,
+      replyTo: email,
+      subject: subject || `Portfolio Message from ${name}`,
+      text: `
 Name: ${name}
 Email: ${email}
 Subject: ${subject || "N/A"}
 
 Message:
 ${message}
-        `
-      });
+      `
+    });
 
-      emailSent = true;
-      console.log("✉️ Email sent successfully via Gmail SMTP!");
-    } catch (err) {
-      emailError = err;
-      console.error("MAIL ERROR:", err.message);
-    }
-  } else {
-    console.warn("⚠️ EMAIL or PASSWORD environment variables missing.");
-  }
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("Email send timeout")), 6000)
+    );
 
-  if (emailSent) {
-    return res.json({ success: true, message: "Message sent! I will reply soon." });
-  } else {
-    // Return success to the user since message is securely saved & stored
+    await Promise.race([sendPromise, timeoutPromise]);
+
+    console.log("✉️ Email delivered successfully to inbox!");
+    return res.json({ success: true, message: "Message sent! I'll reply soon." });
+
+  } catch (err) {
+    console.error("MAIL DELIVERY LOG:", err.message);
     return res.json({ 
       success: true, 
-      message: "Message received & saved successfully! (Note: Gmail SMTP auth pending)",
-      savedLocally: true,
-      emailError: emailError ? emailError.message : "SMTP not configured"
+      message: "Message received! I'll reply soon.",
+      savedLocally: true
     });
   }
 });
