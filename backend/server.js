@@ -139,6 +139,10 @@ app.get("/api/messages", (req, res) => {
   }
 });
 
+app.get("/send", (req, res) => {
+  res.redirect("/");
+});
+
 app.post("/send", (req, res) => {
   const { name, email, subject, message } = req.body;
 
