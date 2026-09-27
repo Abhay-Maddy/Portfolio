@@ -288,29 +288,7 @@ document.querySelectorAll('.project-card').forEach(function (card) {
 
   var WEB3FORMS_KEY = (window.WEB3FORMS_KEY || 'a702fd7f-2f49-4e03-b687-e9e7688397f7').trim();
 
-  form.addEventListener('submit', function (e) {
-    e.preventDefault();
-
-    var btn = form.querySelector('button[type="submit"]');
-    var name = (document.getElementById('contactName') || {}).value || '';
-    var email = (document.getElementById('contactEmail') || {}).value || '';
-    var subject = (document.getElementById('contactSubject') || {}).value || '';
-    var message = (document.getElementById('contactMessage') || {}).value || '';
-
-    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending…'; }
-
-    // 1. If running on Node.js backend server (port 5000 / custom host), persist to backend database
-    // Avoid calling static dev servers (e.g., Live Server port 5500/5501) which return 405 Method Not Allowed
-    var isStaticHost = window.location.port === '5500' || window.location.port === '5501' || window.location.port === '8080' || window.location.hostname.endsWith('github.io') || window.location.protocol === 'file:';
-    if (!isStaticHost) {
-      fetch('/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name, email: email, subject: subject, message: message })
-      }).catch(function (err) { console.warn('Backend note:', err); });
-    }
-
-    // 2. Direct client-side email delivery via Web3Forms API to abhaymaddheshiya159@gmail.com
+  function sendWeb3Forms(form, btn) {
     var formData = new FormData(form);
     if (!formData.get('access_key')) {
       formData.append('access_key', WEB3FORMS_KEY);
@@ -323,10 +301,10 @@ document.querySelectorAll('.project-card').forEach(function (card) {
       .then(function (r) { return r.json(); })
       .then(function (res) {
         if (res.success) {
-          showToast('✅ Message sent! Check your Gmail Inbox (and Spam/Junk folder).', 'success');
+          showToast('✅ Message sent! Check your Gmail Inbox (and Spam folder).', 'success');
           form.reset();
         } else {
-          showToast('❌ Delivery failed: ' + (res.message || 'Please try again.'), 'error');
+          showToast('❌ Delivery error: ' + (res.message || 'Failed to deliver email.'), 'error');
         }
       })
       .catch(function (err) {
@@ -336,8 +314,64 @@ document.querySelectorAll('.project-card').forEach(function (card) {
       .finally(function () {
         if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message'; }
       });
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    var btn = form.querySelector('button[type="submit"]');
+    var name = (document.getElementById('contactName') || {}).value || '';
+    var email = (document.getElementById('contactEmail') || {}).value || '';
+    var subject = (document.getElementById('contactSubject') || {}).value || '';
+    var message = (document.getElementById('contactMessage') || {}).value || '';
+
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending…'; }
+
+    // 1. If running on local Node.js server (not static Live Server or GitHub Pages), call local backend
+    var isStaticHost = window.location.port === '5500' || window.location.port === '5501' || window.location.port === '8080' || window.location.hostname.endsWith('github.io') || window.location.protocol === 'file:';
+    if (!isStaticHost) {
+      fetch('/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name, email: email, subject: subject, message: message })
+      }).catch(function (err) { console.warn('Backend note:', err); });
+    }
+
+    // 2. Submit via FormSubmit API targeting abhaymaddheshiya159@gmail.com
+    fetch('https://formsubmit.co/ajax/abhaymaddheshiya159@gmail.com', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        name: name,
+        email: email,
+        _subject: subject || 'Portfolio Contact Message from ' + name,
+        message: message
+      })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        if (res.success === 'true' || res.success === true) {
+          showToast('✅ Message sent! Delivered directly to your Gmail inbox.', 'success');
+          form.reset();
+          if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message'; }
+        } else if (res.message && res.message.toLowerCase().indexOf('activation') !== -1) {
+          showToast('⚠️ Form Activation Required! Please check abhaymaddheshiya159@gmail.com and click "Activate Form".', 'error');
+          if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message'; }
+        } else {
+          // Fallback to Web3Forms
+          sendWeb3Forms(form, btn);
+        }
+      })
+      .catch(function (err) {
+        console.warn('[FormSubmit failed, using Web3Forms fallback]', err);
+        sendWeb3Forms(form, btn);
+      });
   });
 })();
+
 
 
 // ── Toast notifications ──────────────────────────────────────────

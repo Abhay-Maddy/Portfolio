@@ -68,6 +68,14 @@ html {
   scroll-behavior: smooth;
 }
 
+html, body {
+  cursor: auto !important;
+}
+
+a, button, [role="button"], input, textarea, select, .btn, .project-card, .experience-card, .skill-tag, .social-link, .theme-toggle, .mobile-toggle, .back-to-top {
+  cursor: pointer !important;
+}
+
 body {
   font-family: 'Space Grotesk', sans-serif;
   background: var(--bg);
