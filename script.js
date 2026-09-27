@@ -23,83 +23,6 @@ window.addEventListener('load', function () {
   }, { passive: true });
 })();
 
-// ── Custom cursor ────────────────────────────────────────────────
-(function () {
-  var dot = document.getElementById('cursor-dot');
-  var ring = document.getElementById('cursor-ring');
-  if (!dot || !ring) return;
-
-  var mx = 0, my = 0, rx = 0, ry = 0;
-
-  document.addEventListener('mousemove', function (e) {
-    mx = e.clientX; my = e.clientY;
-    dot.style.left = mx + 'px';
-    dot.style.top = my + 'px';
-    dot.style.opacity = '1';
-    ring.style.opacity = '1';
-  });
-
-  document.addEventListener('mouseleave', function () {
-    dot.style.opacity = '0';
-    ring.style.opacity = '0';
-  });
-
-  (function lerpRing() {
-    rx += (mx - rx) * 0.09;
-    ry += (my - ry) * 0.09;
-    ring.style.left = rx + 'px';
-    ring.style.top = ry + 'px';
-    requestAnimationFrame(lerpRing);
-  })();
-
-  // Trail
-  var TRAIL = 10;
-  var trail = [];
-  for (var i = 0; i < TRAIL; i++) {
-    var t = document.createElement('div');
-    t.className = 'cursor-trail';
-    document.body.appendChild(t);
-    trail.push({ el: t, x: 0, y: 0, life: 0 });
-  }
-  var head = 0;
-
-  document.addEventListener('mousemove', function (e) {
-    var p = trail[head % TRAIL];
-    p.x = e.clientX; p.y = e.clientY; p.life = 1;
-    head++;
-  });
-
-  (function animTrail() {
-    for (var i = 0; i < TRAIL; i++) {
-      var p = trail[i];
-      p.life -= 0.06;
-      if (p.life < 0) p.life = 0;
-      var s = p.life * 9;
-      var hue = (Date.now() * 0.06 + i * 25) % 360;
-      p.el.style.cssText =
-        'position:fixed;pointer-events:none;border-radius:50%;z-index:999993;' +
-        'transform:translate(-50%,-50%);' +
-        'left:' + p.x + 'px;top:' + p.y + 'px;' +
-        'width:' + s + 'px;height:' + s + 'px;' +
-        'background:hsla(' + hue + ',80%,65%,' + (p.life * 0.5) + ');' +
-        'box-shadow:0 0 ' + (s * 2) + 'px hsla(' + hue + ',80%,65%,' + (p.life * 0.3) + ');';
-    }
-    requestAnimationFrame(animTrail);
-  })();
-
-  // Hover expand
-  document.querySelectorAll('a, button, .project-card, .experience-card, .skill-tag').forEach(function (el) {
-    el.addEventListener('mouseenter', function () {
-      dot.classList.add('dot-big');
-      ring.classList.add('ring-big');
-    });
-    el.addEventListener('mouseleave', function () {
-      dot.classList.remove('dot-big');
-      ring.classList.remove('ring-big');
-    });
-  });
-})();
-
 // ── Particles ────────────────────────────────────────────────────
 (function () {
   var c = document.getElementById('particle-canvas');
@@ -358,13 +281,11 @@ document.querySelectorAll('.project-card').forEach(function (card) {
   card.addEventListener('mouseleave', function () { card.style.transform = ''; });
 });
 
-// ── Contact form ──
+// ── Contact form ──────────────────────────────────────────────────
 (function () {
   var form = document.getElementById('contactForm');
   if (!form) return;
 
-  var API = '/send';
-  // Web3Forms Access Key for direct client-side email delivery to abhaymaddheshiya159@gmail.com
   var WEB3FORMS_KEY = (window.WEB3FORMS_KEY || 'a702fd7f-2f49-4e03-b687-e9e7688397f7').trim();
 
   form.addEventListener('submit', function (e) {
@@ -378,14 +299,18 @@ document.querySelectorAll('.project-card').forEach(function (card) {
 
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending…'; }
 
-    // 1. Store message in server database (messages.json)
-    fetch(API, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: name, email: email, subject: subject, message: message })
-    }).catch(function (err) { console.warn('Backend persistence note:', err); });
+    // 1. If running on Node.js backend server (port 5000 / custom host), persist to backend database
+    // Avoid calling static dev servers (e.g., Live Server port 5500/5501) which return 405 Method Not Allowed
+    var isStaticHost = window.location.port === '5500' || window.location.port === '5501' || window.location.port === '8080' || window.location.hostname.endsWith('github.io') || window.location.protocol === 'file:';
+    if (!isStaticHost) {
+      fetch('/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name, email: email, subject: subject, message: message })
+      }).catch(function (err) { console.warn('Backend note:', err); });
+    }
 
-    // 2. Deliver email via Web3Forms API directly using FormData for 100% browser compatibility & Gmail inbox delivery
+    // 2. Direct client-side email delivery via Web3Forms API to abhaymaddheshiya159@gmail.com
     var formData = new FormData(form);
     if (!formData.get('access_key')) {
       formData.append('access_key', WEB3FORMS_KEY);
@@ -398,15 +323,14 @@ document.querySelectorAll('.project-card').forEach(function (card) {
       .then(function (r) { return r.json(); })
       .then(function (res) {
         if (res.success) {
-          showToast('✅ Message sent! Delivered directly to Gmail inbox.', 'success');
+          showToast('✅ Message sent! Check your Gmail Inbox (and Spam/Junk folder).', 'success');
           form.reset();
         } else {
-          // If key needs verification or setup
-          showToast('❌ ' + (res.message || 'Failed to deliver email.'), 'error');
+          showToast('❌ Delivery failed: ' + (res.message || 'Please try again.'), 'error');
         }
       })
       .catch(function (err) {
-        console.error('[Web3Forms]', err);
+        console.error('[Web3Forms Error]', err);
         showToast('❌ Email delivery error. Please try again.', 'error');
       })
       .finally(function () {
@@ -414,6 +338,7 @@ document.querySelectorAll('.project-card').forEach(function (card) {
       });
   });
 })();
+
 
 // ── Toast notifications ──────────────────────────────────────────
 function showToast(msg, type) {

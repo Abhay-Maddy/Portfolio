@@ -74,7 +74,6 @@ body {
   color: var(--t1);
   overflow-x: hidden;
   line-height: 1.65;
-  cursor: none;
   transition: background .5s var(--ease), color .4s var(--ease);
 }
 
@@ -131,71 +130,6 @@ body::after {
   pointer-events: none;
   z-index: 99990;
   opacity: .28;
-}
-
-/* ── Custom cursor ────────────────────────────── */
-body,
-a,
-button,
-.project-card,
-.experience-card,
-.skill-tag,
-.social-link,
-.theme-toggle,
-.mobile-toggle,
-.back-to-top {
-  cursor: none !important;
-}
-
-#cursor-dot {
-  position: fixed;
-  z-index: 999999;
-  pointer-events: none;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  background: radial-gradient(circle at 35% 35%, #fff 0%, #a855f7 55%, #06b6d4 100%);
-  box-shadow: 0 0 6px 2px rgba(168, 85, 247, .9), 0 0 18px 4px rgba(6, 182, 212, .5);
-  transition: width .25s var(--spring), height .25s var(--spring), opacity .3s;
-  opacity: 0;
-}
-
-#cursor-ring {
-  position: fixed;
-  z-index: 999998;
-  pointer-events: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  border: 1.5px solid rgba(124, 58, 237, .6);
-  transition: width .35s var(--spring), height .35s var(--spring), border-color .3s, opacity .3s;
-  opacity: 0;
-  animation: ringPulse 3s ease-in-out infinite;
-}
-
-@keyframes ringPulse {
-
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 rgba(124, 58, 237, .4);
-  }
-
-  50% {
-    box-shadow: 0 0 12px 4px rgba(6, 182, 212, .35);
-  }
-}
-
-#cursor-dot.dot-big {
-  width: 18px;
-  height: 18px;
-}
-
-#cursor-ring.ring-big {
-  width: 62px;
-  height: 62px;
-  border-color: var(--c);
 }
 
 /* ── Loader ───────────────────────────────────── */
@@ -1929,22 +1863,6 @@ hr {
     height: 360px;
   }
 
-  #cursor-dot,
-  #cursor-ring,
-  .cursor-trail {
-    display: none !important;
-  }
-
-  body,
-  a,
-  button,
-  .btn,
-  .back-to-top,
-  .project-link,
-  .social-link {
-    cursor: pointer !important;
-  }
-
   .social-links {
     padding-left: 0;
   }
@@ -1978,8 +1896,6 @@ hr {
   .navbar,
   .back-to-top,
   #particle-canvas,
-  #cursor-dot,
-  #cursor-ring,
   .hero-blob {
     display: none;
   }
