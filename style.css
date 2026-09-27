@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
 
-/* ── Variables ──────────────────────────────── */
+/* Design System & CSS Variables */
 :root {
   --bg: #07070e;
   --bg2: #0c0c1a;
@@ -55,7 +55,7 @@
   --sh: 0 20px 60px rgba(0, 0, 0, .12);
 }
 
-/* ── Reset ──────────────────────────────────── */
+/* Global Reset & Base Rules */
 *,
 *::before,
 *::after {
@@ -599,6 +599,11 @@ body::after {
 .btn-primary:hover {
   box-shadow: 0 8px 44px rgba(124, 58, 237, .7);
   transform: translateY(-2px);
+}
+
+.btn-full {
+  width: 100%;
+  justify-content: center;
 }
 
 .btn-ghost {

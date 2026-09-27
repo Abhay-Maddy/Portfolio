@@ -1,295 +1,339 @@
 /**
- * Portfolio — Main Script
- * Hand-written, no frameworks, no AI patterns
+ * Abhay Maddheshiya - Portfolio Interactivity & Contact Form Controller
  */
 
-// ── Loader ──────────────────────────────────────────────────────
-window.addEventListener('load', function () {
-  var loader = document.getElementById('loader');
-  setTimeout(function () {
-    if (loader) loader.classList.add('hidden');
-  }, 900);
+// Page Loader
+window.addEventListener('load', () => {
+  const loader = document.getElementById('loader');
+  if (loader) {
+    setTimeout(() => loader.classList.add('hidden'), 800);
+  }
 });
 
-// ── Scroll progress bar ──────────────────────────────────────────
-(function () {
-  var bar = document.createElement('div');
-  bar.id = 'scroll-bar';
-  document.body.appendChild(bar);
-  window.addEventListener('scroll', function () {
-    var h = document.documentElement;
-    var pct = (window.scrollY / (h.scrollHeight - h.clientHeight)) * 100;
-    bar.style.width = pct + '%';
+// Top Scroll Progress Bar
+(() => {
+  const progressBar = document.createElement('div');
+  progressBar.id = 'scroll-bar';
+  document.body.appendChild(progressBar);
+
+  window.addEventListener('scroll', () => {
+    const doc = document.documentElement;
+    const scrollPercentage = (window.scrollY / (doc.scrollHeight - doc.clientHeight)) * 100;
+    progressBar.style.width = `${scrollPercentage}%`;
   }, { passive: true });
 })();
 
-// ── Particles ────────────────────────────────────────────────────
-(function () {
-  var c = document.getElementById('particle-canvas');
-  if (!c) return;
-  var ctx = c.getContext('2d');
-  var W, H, pts = [];
+// Background Particle Canvas Animation
+(() => {
+  const canvas = document.getElementById('particle-canvas');
+  if (!canvas) return;
 
-  function resize() {
-    W = c.width = window.innerWidth;
-    H = c.height = window.innerHeight;
+  const ctx = canvas.getContext('2d');
+  let width = 0;
+  let height = 0;
+  const particles = [];
+
+  function resizeCanvas() {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
   }
-  resize();
-  window.addEventListener('resize', resize);
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
 
-  function mk() {
+  function createParticle() {
     return {
-      x: Math.random() * W, y: Math.random() * H,
-      vx: (Math.random() - .5) * .4, vy: (Math.random() - .5) * .4,
-      r: Math.random() * 1.5 + .4,
-      a: Math.random() * .45 + .1,
+      x: Math.random() * width,
+      y: Math.random() * height,
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: (Math.random() - 0.5) * 0.4,
+      radius: Math.random() * 1.5 + 0.4,
+      alpha: Math.random() * 0.45 + 0.1,
       hue: [260, 200, 320][Math.floor(Math.random() * 3)],
-      ph: Math.random() * Math.PI * 2
+      phase: Math.random() * Math.PI * 2
     };
   }
 
-  for (var i = 0; i < 120; i++) pts.push(mk());
+  for (let i = 0; i < 110; i++) {
+    particles.push(createParticle());
+  }
 
-  var t = 0;
-  function draw() {
-    t += .007;
-    ctx.clearRect(0, 0, W, H);
-    for (var i = 0; i < pts.length; i++) {
-      var p = pts[i];
-      p.x += p.vx; p.y += p.vy;
-      if (p.x < -4) p.x = W + 4;
-      if (p.x > W + 4) p.x = -4;
-      if (p.y < -4) p.y = H + 4;
-      if (p.y > H + 4) p.y = -4;
-      var a = p.a * (.65 + .35 * Math.sin(t + p.ph));
+  let time = 0;
+  function renderParticles() {
+    time += 0.007;
+    ctx.clearRect(0, 0, width, height);
+
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+
+      if (p.x < -4) p.x = width + 4;
+      if (p.x > width + 4) p.x = -4;
+      if (p.y < -4) p.y = height + 4;
+      if (p.y > height + 4) p.y = -4;
+
+      const dynamicAlpha = p.alpha * (0.65 + 0.35 * Math.sin(time + p.phase));
       ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = 'hsla(' + p.hue + ',75%,68%,' + a + ')';
+      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(${p.hue}, 75%, 68%, ${dynamicAlpha})`;
       ctx.fill();
     }
-    for (var i = 0; i < pts.length; i++) {
-      for (var j = i + 1; j < pts.length; j++) {
-        var dx = pts[i].x - pts[j].x, dy = pts[i].y - pts[j].y;
-        var d = Math.sqrt(dx * dx + dy * dy);
-        if (d < 100) {
+
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist < 100) {
           ctx.beginPath();
-          ctx.moveTo(pts[i].x, pts[i].y);
-          ctx.lineTo(pts[j].x, pts[j].y);
-          ctx.strokeStyle = 'rgba(120,80,220,' + (.08 * (1 - d / 100)) + ')';
-          ctx.lineWidth = .5;
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.strokeStyle = `rgba(120, 80, 220, ${0.08 * (1 - dist / 100)})`;
+          ctx.lineWidth = 0.5;
           ctx.stroke();
         }
       }
     }
-    requestAnimationFrame(draw);
+
+    requestAnimationFrame(renderParticles);
   }
-  draw();
+  renderParticles();
 })();
 
-// ── Typewriter ───────────────────────────────────────────────────
-(function () {
-  var el = document.getElementById('typewriter');
-  if (!el) return;
-  var words = ['Software Developer', 'Full-Stack Engineer', 'Problem Solver', 'BTech Student', 'Open Source Enthusiast'];
-  var wi = 0, ci = 0, del = false;
+// Typewriter Hero Animation
+(() => {
+  const typewriterElement = document.getElementById('typewriter');
+  if (!typewriterElement) return;
 
-  function tick() {
-    var w = words[wi];
-    if (!del) {
-      ci++;
-      el.textContent = w.slice(0, ci);
-      if (ci === w.length) { del = true; return setTimeout(tick, 1800); }
-      setTimeout(tick, 82);
+  const words = ['Software Developer', 'Full-Stack Engineer', 'Problem Solver', 'BTech Student', 'Open Source Enthusiast'];
+  let wordIndex = 0;
+  let charIndex = 0;
+  let isDeleting = false;
+
+  function typeStep() {
+    const currentWord = words[wordIndex];
+
+    if (!isDeleting) {
+      charIndex++;
+      typewriterElement.textContent = currentWord.slice(0, charIndex);
+
+      if (charIndex === currentWord.length) {
+        isDeleting = true;
+        return setTimeout(typeStep, 1800);
+      }
+      setTimeout(typeStep, 80);
     } else {
-      ci--;
-      el.textContent = w.slice(0, ci);
-      if (ci === 0) { del = false; wi = (wi + 1) % words.length; }
-      setTimeout(tick, 46);
+      charIndex--;
+      typewriterElement.textContent = currentWord.slice(0, charIndex);
+
+      if (charIndex === 0) {
+        isDeleting = false;
+        wordIndex = (wordIndex + 1) % words.length;
+      }
+      setTimeout(typeStep, 45);
     }
   }
-  setTimeout(tick, 1800);
+
+  setTimeout(typeStep, 1500);
 })();
 
-// ── Theme toggle ─────────────────────────────────────────────────
-(function () {
-  var btn = document.getElementById('theme-toggle');
-  var html = document.documentElement;
-  var saved = localStorage.getItem('theme') || 'dark';
-  html.setAttribute('data-theme', saved);
-  syncIcon(saved);
+// Theme Toggle (Dark / Light)
+(() => {
+  const toggleBtn = document.getElementById('theme-toggle');
+  const root = document.documentElement;
+  const savedTheme = localStorage.getItem('theme') || 'dark';
 
-  if (!btn) return;
-  btn.addEventListener('click', function () {
-    var cur = html.getAttribute('data-theme');
-    var next = cur === 'dark' ? 'light' : 'dark';
-    html.setAttribute('data-theme', next);
-    localStorage.setItem('theme', next);
-    syncIcon(next);
-    btn.style.transform = 'rotate(180deg) scale(.8)';
-    setTimeout(function () { btn.style.transform = ''; }, 300);
+  root.setAttribute('data-theme', savedTheme);
+  updateThemeIcon(savedTheme);
+
+  if (!toggleBtn) return;
+
+  toggleBtn.addEventListener('click', () => {
+    const currentTheme = root.getAttribute('data-theme');
+    const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+    root.setAttribute('data-theme', nextTheme);
+    localStorage.setItem('theme', nextTheme);
+    updateThemeIcon(nextTheme);
+
+    toggleBtn.style.transform = 'rotate(180deg) scale(0.85)';
+    setTimeout(() => toggleBtn.style.transform = '', 300);
   });
 
-  function syncIcon(t) {
-    if (!btn) return;
-    var ic = btn.querySelector('i');
-    if (ic) ic.className = t === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+  function updateThemeIcon(theme) {
+    if (!toggleBtn) return;
+    const icon = toggleBtn.querySelector('i');
+    if (icon) {
+      icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+    }
   }
 })();
 
-// ── Navbar scroll + active link ──────────────────────────────────
-(function () {
-  var nav = document.getElementById('navbar');
+// Navigation Scroll State & Mobile Drawer Toggle
+(() => {
+  const navbar = document.getElementById('navbar');
+  const backToTopBtn = document.getElementById('back-to-top');
 
-  function onScroll() {
-    if (nav) nav.classList.toggle('scrolled', window.scrollY > 80);
-    var sections = document.querySelectorAll('section[id]');
-    var cur = '';
-    sections.forEach(function (s) {
-      if (window.scrollY >= s.offsetTop - 240) cur = s.id;
+  function handleScroll() {
+    const scrollY = window.scrollY;
+
+    if (navbar) {
+      navbar.classList.toggle('scrolled', scrollY > 70);
+    }
+
+    const sections = document.querySelectorAll('section[id]');
+    let currentSection = '';
+
+    sections.forEach(sec => {
+      if (scrollY >= sec.offsetTop - 240) {
+        currentSection = sec.id;
+      }
     });
-    document.querySelectorAll('.nav-link').forEach(function (a) {
-      a.classList.toggle('active', a.getAttribute('href') === '#' + cur);
+
+    document.querySelectorAll('.nav-link').forEach(link => {
+      const href = link.getAttribute('href');
+      link.classList.toggle('active', href === `#${currentSection}`);
     });
-    var btt = document.getElementById('back-to-top');
-    if (btt) btt.classList.toggle('show', window.scrollY > 400);
+
+    if (backToTopBtn) {
+      backToTopBtn.classList.toggle('show', scrollY > 400);
+    }
   }
 
-  window.addEventListener('scroll', onScroll, { passive: true });
-  requestAnimationFrame(onScroll);
+  window.addEventListener('scroll', handleScroll, { passive: true });
+  handleScroll();
 
-  // Mobile menu
-  var mBtn = document.getElementById('mobile-toggle');
-  var menu = document.getElementById('nav-menu');
-  if (mBtn && menu) {
-    mBtn.addEventListener('click', function () {
-      menu.classList.toggle('active');
-      var ic = mBtn.querySelector('i');
-      if (ic) ic.className = menu.classList.contains('active') ? 'fas fa-times' : 'fas fa-bars';
+  // Mobile Menu Navigation
+  const mobileToggle = document.getElementById('mobile-toggle');
+  const navMenu = document.getElementById('nav-menu');
+
+  if (mobileToggle && navMenu) {
+    mobileToggle.addEventListener('click', () => {
+      const isOpen = navMenu.classList.toggle('active');
+      const icon = mobileToggle.querySelector('i');
+      if (icon) {
+        icon.className = isOpen ? 'fas fa-times' : 'fas fa-bars';
+      }
     });
-    document.querySelectorAll('.nav-link').forEach(function (l) {
-      l.addEventListener('click', function () {
-        menu.classList.remove('active');
-        var ic = mBtn.querySelector('i');
-        if (ic) ic.className = 'fas fa-bars';
+
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        navMenu.classList.remove('active');
+        const icon = mobileToggle.querySelector('i');
+        if (icon) icon.className = 'fas fa-bars';
       });
     });
   }
 })();
 
-// ── Smooth anchor ────────────────────────────────────────────────
-document.querySelectorAll('a[href^="#"]').forEach(function (a) {
-  a.addEventListener('click', function (e) {
-    var t = document.querySelector(this.getAttribute('href'));
-    if (t) { e.preventDefault(); t.scrollIntoView({ behavior: 'smooth' }); }
+// Smooth Anchor Link Scrolling
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function (e) {
+    const target = document.querySelector(this.getAttribute('href'));
+    if (target) {
+      e.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth' });
+    }
   });
 });
 
-// ── Back to top ──────────────────────────────────────────────────
-var btt = document.getElementById('back-to-top');
-if (btt) {
-  btt.addEventListener('click', function (e) {
-    e.preventDefault();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-}
-
-// ── IntersectionObserver reveals ────────────────────────────────
-(function () {
-  var io = new IntersectionObserver(function (entries) {
-    entries.forEach(function (en) {
-      if (en.isIntersecting) {
-        en.target.classList.add('visible');
-        io.unobserve(en.target);
+// Scroll Reveal Animations
+(() => {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
       }
     });
   }, { threshold: 0.08, rootMargin: '0px 0px -50px 0px' });
 
-  document.querySelectorAll('.fade-up, .fade-left, .fade-right').forEach(function (el) {
-    io.observe(el);
-  });
+  document.querySelectorAll('.fade-up, .fade-left, .fade-right').forEach(el => observer.observe(el));
 
-  // Staggered cards
-  var cardIO = new IntersectionObserver(function (entries) {
-    entries.forEach(function (en) {
-      if (!en.isIntersecting) return;
-      en.target.querySelectorAll('.project-card, .experience-card').forEach(function (card, i) {
-        setTimeout(function () { card.classList.add('visible'); }, i * 110);
+  // Staggered Cards Animation
+  const cardObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const cards = entry.target.querySelectorAll('.project-card, .experience-card');
+      cards.forEach((card, index) => {
+        setTimeout(() => card.classList.add('visible'), index * 100);
       });
-      cardIO.unobserve(en.target);
+      cardObserver.unobserve(entry.target);
     });
   }, { threshold: 0.05 });
 
-  var pg = document.querySelector('.projects-grid');
-  var ec = document.querySelector('.experience-container');
-  if (pg) cardIO.observe(pg);
-  if (ec) cardIO.observe(ec);
+  const projectGrid = document.querySelector('.projects-grid');
+  const experienceContainer = document.querySelector('.experience-container');
+  if (projectGrid) cardObserver.observe(projectGrid);
+  if (experienceContainer) cardObserver.observe(experienceContainer);
 
-  // Skill bars
-  var skillIO = new IntersectionObserver(function (entries) {
-    entries.forEach(function (en) {
-      if (!en.isIntersecting) return;
-      document.querySelectorAll('.skill-progress').forEach(function (bar, i) {
-        setTimeout(function () {
-          bar.style.width = bar.getAttribute('data-width') + '%';
-        }, i * 120);
+  // Skill Bar Animation
+  const skillObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      document.querySelectorAll('.skill-progress').forEach((bar, index) => {
+        setTimeout(() => {
+          bar.style.width = `${bar.getAttribute('data-width')}%`;
+        }, index * 100);
       });
-      skillIO.unobserve(en.target);
+      skillObserver.unobserve(entry.target);
     });
   }, { threshold: 0.2 });
 
-  var sg = document.querySelector('.skills-grid');
-  if (sg) skillIO.observe(sg);
+  const skillGrid = document.querySelector('.skills-grid');
+  if (skillGrid) skillObserver.observe(skillGrid);
 
-  // Counters
-  var cntIO = new IntersectionObserver(function (entries) {
-    entries.forEach(function (en) {
-      if (!en.isIntersecting) return;
-      document.querySelectorAll('[data-count]').forEach(function (el) {
-        var target = parseInt(el.getAttribute('data-count'));
-        var n = 0, step = Math.ceil(target / 32);
-        var iv = setInterval(function () {
-          n = Math.min(n + step, target);
-          el.textContent = n + '+';
-          if (n >= target) clearInterval(iv);
-        }, 48);
+  // Animated Stat Counters
+  const counterObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      document.querySelectorAll('[data-count]').forEach(el => {
+        const target = parseInt(el.getAttribute('data-count'), 10);
+        let count = 0;
+        const step = Math.ceil(target / 30);
+        const timer = setInterval(() => {
+          count = Math.min(count + step, target);
+          el.textContent = `${count}+`;
+          if (count >= target) clearInterval(timer);
+        }, 45);
       });
-      cntIO.unobserve(en.target);
+      counterObserver.unobserve(entry.target);
     });
   }, { threshold: 0.5 });
 
-  var hs = document.querySelector('.hero-stats');
-  if (hs) cntIO.observe(hs);
+  const heroStats = document.querySelector('.hero-stats');
+  if (heroStats) counterObserver.observe(heroStats);
 })();
 
-// ── Card mouse glow ──────────────────────────────────────────────
-document.querySelectorAll('.project-card, .experience-card, .glowcard').forEach(function (card) {
-  card.addEventListener('mousemove', function (e) {
-    var r = card.getBoundingClientRect();
-    card.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
-    card.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
+// Mouse Hover Effect & 3D Tilt on Project Cards
+document.querySelectorAll('.project-card, .experience-card, .glowcard').forEach(card => {
+  card.addEventListener('mousemove', (e) => {
+    const rect = card.getBoundingClientRect();
+    card.style.setProperty('--mx', `${((e.clientX - rect.left) / rect.width) * 100}%`);
+    card.style.setProperty('--my', `${((e.clientY - rect.top) / rect.height) * 100}%`);
   });
 });
 
-// ── 3D tilt on project cards ─────────────────────────────────────
-document.querySelectorAll('.project-card').forEach(function (card) {
-  card.addEventListener('mousemove', function (e) {
-    var r = card.getBoundingClientRect();
-    var dx = (e.clientX - r.left - r.width / 2) / (r.width / 2);
-    var dy = (e.clientY - r.top - r.height / 2) / (r.height / 2);
-    card.style.transform = 'translateY(-12px) rotateY(' + (dx * 6) + 'deg) rotateX(' + (-dy * 6) + 'deg) scale(1.02)';
+document.querySelectorAll('.project-card').forEach(card => {
+  card.addEventListener('mousemove', (e) => {
+    const rect = card.getBoundingClientRect();
+    const dx = (e.clientX - rect.left - rect.width / 2) / (rect.width / 2);
+    const dy = (e.clientY - rect.top - rect.height / 2) / (rect.height / 2);
+    card.style.transform = `translateY(-10px) rotateY(${dx * 5}deg) rotateX(${-dy * 5}deg) scale(1.01)`;
   });
-  card.addEventListener('mouseleave', function () { card.style.transform = ''; });
+  card.addEventListener('mouseleave', () => card.style.transform = '');
 });
 
-// ── Contact form ──────────────────────────────────────────────────
-(function () {
-  var form = document.getElementById('contactForm');
+// Contact Form Handling (FormSubmit + Web3Forms Fallback + Node Backend Support)
+(() => {
+  const form = document.getElementById('contactForm');
   if (!form) return;
 
-  var WEB3FORMS_KEY = (window.WEB3FORMS_KEY || 'a702fd7f-2f49-4e03-b687-e9e7688397f7').trim();
+  const WEB3FORMS_KEY = (window.WEB3FORMS_KEY || 'a702fd7f-2f49-4e03-b687-e9e7688397f7').trim();
 
-  function sendWeb3Forms(form, btn) {
-    var formData = new FormData(form);
+  function sendWeb3Forms(submitBtn) {
+    const formData = new FormData(form);
     if (!formData.get('access_key')) {
       formData.append('access_key', WEB3FORMS_KEY);
     }
@@ -298,46 +342,55 @@ document.querySelectorAll('.project-card').forEach(function (card) {
       method: 'POST',
       body: formData
     })
-      .then(function (r) { return r.json(); })
-      .then(function (res) {
+      .then(res => res.json())
+      .then(res => {
         if (res.success) {
-          showToast('✅ Message sent! Check your Gmail Inbox (and Spam folder).', 'success');
+          showToast('✅ Message sent! Check your Gmail inbox.', 'success');
           form.reset();
         } else {
-          showToast('❌ Delivery error: ' + (res.message || 'Failed to deliver email.'), 'error');
+          showToast(`❌ Delivery error: ${res.message || 'Failed to deliver email.'}`, 'error');
         }
       })
-      .catch(function (err) {
+      .catch(err => {
         console.error('[Web3Forms Error]', err);
         showToast('❌ Email delivery error. Please try again.', 'error');
       })
-      .finally(function () {
-        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message'; }
+      .finally(() => {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
+        }
       });
   }
 
-  form.addEventListener('submit', function (e) {
+  form.addEventListener('submit', (e) => {
     e.preventDefault();
 
-    var btn = form.querySelector('button[type="submit"]');
-    var name = (document.getElementById('contactName') || {}).value || '';
-    var email = (document.getElementById('contactEmail') || {}).value || '';
-    var subject = (document.getElementById('contactSubject') || {}).value || '';
-    var message = (document.getElementById('contactMessage') || {}).value || '';
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const name = (document.getElementById('contactName') || {}).value || '';
+    const email = (document.getElementById('contactEmail') || {}).value || '';
+    const subject = (document.getElementById('contactSubject') || {}).value || '';
+    const message = (document.getElementById('contactMessage') || {}).value || '';
 
-    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending…'; }
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending…';
+    }
 
-    // 1. If running on local Node.js server (not static Live Server or GitHub Pages), call local backend
-    var isStaticHost = window.location.port === '5500' || window.location.port === '5501' || window.location.port === '8080' || window.location.hostname.endsWith('github.io') || window.location.protocol === 'file:';
+    // Persist to local Node.js backend if active (skip static dev servers)
+    const port = window.location.port;
+    const hostname = window.location.hostname;
+    const isStaticHost = port === '5500' || port === '5501' || port === '8080' || hostname.endsWith('github.io') || window.location.protocol === 'file:';
+
     if (!isStaticHost) {
       fetch('/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name, email: email, subject: subject, message: message })
-      }).catch(function (err) { console.warn('Backend note:', err); });
+        body: JSON.stringify({ name, email, subject, message })
+      }).catch(err => console.warn('Backend persistence notice:', err));
     }
 
-    // 2. Submit via FormSubmit API targeting abhaymaddheshiya159@gmail.com
+    // Deliver via FormSubmit API targeting recipient address
     fetch('https://formsubmit.co/ajax/abhaymaddheshiya159@gmail.com', {
       method: 'POST',
       headers: {
@@ -345,44 +398,48 @@ document.querySelectorAll('.project-card').forEach(function (card) {
         'Accept': 'application/json'
       },
       body: JSON.stringify({
-        name: name,
-        email: email,
-        _subject: subject || 'Portfolio Contact Message from ' + name,
-        message: message
+        name,
+        email,
+        _subject: subject || `Portfolio Contact Message from ${name}`,
+        message
       })
     })
-      .then(function (r) { return r.json(); })
-      .then(function (res) {
+      .then(res => res.json())
+      .then(res => {
         if (res.success === 'true' || res.success === true) {
           showToast('✅ Message sent! Delivered directly to your Gmail inbox.', 'success');
           form.reset();
-          if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message'; }
-        } else if (res.message && res.message.toLowerCase().indexOf('activation') !== -1) {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
+          }
+        } else if (res.message && res.message.toLowerCase().includes('activation')) {
           showToast('⚠️ Form Activation Required! Please check abhaymaddheshiya159@gmail.com and click "Activate Form".', 'error');
-          if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message'; }
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
+          }
         } else {
-          // Fallback to Web3Forms
-          sendWeb3Forms(form, btn);
+          sendWeb3Forms(submitBtn);
         }
       })
-      .catch(function (err) {
-        console.warn('[FormSubmit failed, using Web3Forms fallback]', err);
-        sendWeb3Forms(form, btn);
+      .catch(err => {
+        console.warn('[FormSubmit Notice - switching to Web3Forms]', err);
+        sendWeb3Forms(submitBtn);
       });
   });
 })();
 
+// Toast Notification Manager
+function showToast(message, type = 'success') {
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.innerHTML = message;
+  document.body.appendChild(toast);
 
-
-// ── Toast notifications ──────────────────────────────────────────
-function showToast(msg, type) {
-  var t = document.createElement('div');
-  t.className = 'toast toast-' + (type || 'success');
-  t.innerHTML = msg;
-  document.body.appendChild(t);
-  setTimeout(function () { t.classList.add('toast-in'); }, 10);
-  setTimeout(function () {
-    t.classList.remove('toast-in');
-    setTimeout(function () { t.remove(); }, 400);
+  setTimeout(() => toast.classList.add('toast-in'), 10);
+  setTimeout(() => {
+    toast.classList.remove('toast-in');
+    setTimeout(() => toast.remove(), 400);
   }, 4000);
 }

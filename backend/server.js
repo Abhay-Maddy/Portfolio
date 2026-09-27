@@ -1,32 +1,85 @@
-const cors = require("cors");
-require("dotenv").config();
 const express = require("express");
+const cors = require("cors");
 const nodemailer = require("nodemailer");
 const path = require("path");
 const fs = require("fs");
 const https = require("https");
+require("dotenv").config();
 
 const app = express();
 
-// Full CORS support for all origins & preflight
+// Security: Disable express identifier header
+app.disable("x-powered-by");
+
+// Security: HTTP Response Headers
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-  if (req.method === "OPTIONS") {
-    return res.status(200).end();
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("X-XSS-Protection", "1; mode=block");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  next();
+});
+
+// Configure CORS
+app.use(cors({
+  origin: process.env.ALLOWED_ORIGIN || "*",
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
+app.use(express.json({ limit: "50kb" }));
+
+// Security: Block direct access to sensitive backend files
+app.use((req, res, next) => {
+  const forbiddenPatterns = [/\.env/i, /messages\.json/i, /\.git/i, /package\.json/i];
+  if (forbiddenPatterns.some(pattern => pattern.test(req.path))) {
+    return res.status(403).json({ success: false, message: "Access forbidden." });
   }
   next();
 });
 
-app.use(cors({ origin: "*", methods: ["GET", "POST", "OPTIONS"], allowedHeaders: ["Content-Type", "Authorization"] }));
-app.use(express.json());
+// Serve static frontend assets cleanly
+app.use(express.static(path.join(__dirname, ".."), {
+  dotfiles: "ignore",
+  index: "index.html"
+}));
 
-// Serve static portfolio files
-app.use(express.static(path.join(__dirname, "..")));
+// Rate limiter for contact submission endpoint (max 5 requests per 15 min per IP)
+const rateLimitMap = new Map();
+function rateLimiter(req, res, next) {
+  const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress || "unknown";
+  const now = Date.now();
+  const windowMs = 15 * 60 * 1000;
+  const maxRequests = 5;
 
-// File path for storing messages as backup
+  const record = rateLimitMap.get(ip) || { count: 0, resetTime: now + windowMs };
+
+  if (now > record.resetTime) {
+    record.count = 1;
+    record.resetTime = now + windowMs;
+  } else {
+    record.count++;
+  }
+
+  rateLimitMap.set(ip, record);
+
+  if (record.count > maxRequests) {
+    return res.status(429).json({
+      success: false,
+      message: "Too many contact requests. Please try again in a few minutes."
+    });
+  }
+
+  next();
+}
+
+// Storage path for local database backup
 const MESSAGES_FILE = path.join(__dirname, "messages.json");
+
+function sanitizeString(str) {
+  if (typeof str !== "string") return "";
+  return str.replace(/</g, "&lt;").replace(/>/g, "&gt;").trim();
+}
 
 function saveMessageLocally(msgData) {
   try {
@@ -37,9 +90,8 @@ function saveMessageLocally(msgData) {
     }
     messages.push(msgData);
     fs.writeFileSync(MESSAGES_FILE, JSON.stringify(messages, null, 2), "utf8");
-    console.log("💾 Message saved to messages.json");
   } catch (err) {
-    console.error("Failed to save message:", err.message);
+    console.error("Failed to persist message:", err.message);
   }
 }
 
@@ -49,17 +101,12 @@ async function deliverEmail(name, email, subject, message) {
   const cleanPassword = rawPass.replace(/['"\s]+/g, "");
   const web3Key = (process.env.WEB3FORMS_KEY || process.env.ACCESS_KEY || "").trim();
 
-  let errors = [];
-
-  // 1. Try Nodemailer Gmail SMTP
+  // 1. Try Gmail SMTP
   if (emailUser && cleanPassword) {
     try {
-      console.log("⚡ Attempting Nodemailer Gmail SMTP...");
       const transporter = nodemailer.createTransport({
         service: "gmail",
-        connectionTimeout: 4000,
-        greetingTimeout: 4000,
-        socketTimeout: 4000,
+        connectionTimeout: 5000,
         auth: { user: emailUser, pass: cleanPassword }
       });
 
@@ -68,38 +115,26 @@ async function deliverEmail(name, email, subject, message) {
         to: emailUser,
         replyTo: email,
         subject: subject || `Portfolio Message from ${name}`,
-        text: `
-Name: ${name}
-Email: ${email}
-Subject: ${subject || "N/A"}
-
-Message:
-${message}
-        `
+        text: `Name: ${name}\nEmail: ${email}\nSubject: ${subject}\n\nMessage:\n${message}`
       });
-      console.log("🚀 Email delivered via Gmail SMTP!");
       return { success: true };
     } catch (err) {
-      console.error("⚠️ Gmail SMTP failed:", err.message);
-      errors.push("SMTP: " + err.message);
+      console.error("Gmail SMTP Notice:", err.message);
     }
-  } else {
-    errors.push("SMTP: Missing EMAIL or PASSWORD credentials");
   }
 
-  // 2. Try Web3Forms HTTPS API (Port 443 - Works 100% on Render & Cloud hosts)
+  // 2. Try Web3Forms API
   if (web3Key) {
     try {
-      console.log("⚡ Attempting Web3Forms HTTPS API over Port 443...");
       const payload = JSON.stringify({
         access_key: web3Key,
-        name: name,
-        email: email,
+        name,
+        email,
         subject: subject || `Portfolio Message from ${name}`,
-        message: message
+        message
       });
 
-      const body = await new Promise((resolve, reject) => {
+      const responseBody = await new Promise((resolve, reject) => {
         const req = https.request("https://api.web3forms.com/submit", {
           method: "POST",
           headers: {
@@ -117,32 +152,30 @@ ${message}
         req.end();
       });
 
-      const parsed = JSON.parse(body || "{}");
-      if (parsed.success) {
-        console.log("🚀 Email delivered via Web3Forms HTTPS API!");
-        return { success: true };
-      } else {
-        errors.push("Web3Forms API: " + (parsed.message || "API rejected payload"));
-      }
+      const parsed = JSON.parse(responseBody || "{}");
+      if (parsed.success) return { success: true };
     } catch (err) {
-      console.error("⚠️ Web3Forms API failed:", err.message);
-      errors.push("Web3Forms API: " + err.message);
+      console.error("Web3Forms Notice:", err.message);
     }
-  } else {
-    errors.push("Web3Forms: WEB3FORMS_KEY environment variable not set on server");
   }
 
-  return { success: false, error: errors.join(" | ") };
+  return { success: false };
 }
 
+// Health check endpoint
 app.get("/api-status", (req, res) => {
-  res.json({
-    success: true,
-    message: "Portfolio Contact API is running 🚀"
-  });
+  res.json({ success: true, status: "healthy", timestamp: new Date().toISOString() });
 });
 
+// Protected endpoint to retrieve stored messages
 app.get("/api/messages", (req, res) => {
+  const authHeader = req.headers.authorization;
+  const adminSecret = process.env.ADMIN_SECRET;
+
+  if (!adminSecret || authHeader !== `Bearer ${adminSecret}`) {
+    return res.status(401).json({ success: false, message: "Unauthorized access." });
+  }
+
   try {
     if (fs.existsSync(MESSAGES_FILE)) {
       const data = fs.readFileSync(MESSAGES_FILE, "utf8");
@@ -150,7 +183,7 @@ app.get("/api/messages", (req, res) => {
     }
     res.json({ success: true, messages: [] });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, message: "Internal server error." });
   }
 });
 
@@ -158,11 +191,25 @@ app.get("/send", (req, res) => {
   res.redirect("/");
 });
 
-app.post("/send", async (req, res) => {
-  const { name, email, subject, message } = req.body;
+app.post("/send", rateLimiter, async (req, res) => {
+  let { name, email, subject, message } = req.body || {};
+
+  name = sanitizeString(name);
+  email = sanitizeString(email);
+  subject = sanitizeString(subject);
+  message = sanitizeString(message);
 
   if (!name || !email || !message) {
     return res.status(400).json({ success: false, message: "Name, email, and message are required." });
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ success: false, message: "Please provide a valid email address." });
+  }
+
+  if (name.length > 100 || email.length > 150 || subject.length > 200 || message.length > 3000) {
+    return res.status(400).json({ success: false, message: "Input length exceeds maximum allowed limit." });
   }
 
   const msgEntry = {
@@ -174,22 +221,13 @@ app.post("/send", async (req, res) => {
     timestamp: new Date().toISOString()
   };
 
-  // 1. Save message locally in messages.json
   saveMessageLocally(msgEntry);
+  deliverEmail(name, email, subject, message).catch(() => {});
 
-  // 2. Try Nodemailer Gmail delivery (non-blocking)
-  deliverEmail(name, email, subject, message).catch(err => {
-    console.log("Server email log:", err.message);
-  });
-
-  return res.json({
-    success: true,
-    message: "Message saved to server database."
-  });
+  return res.json({ success: true, message: "Message received successfully." });
 });
 
 const PORT = process.env.PORT || 5000;
-
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Server listening on port ${PORT}`);
 });
